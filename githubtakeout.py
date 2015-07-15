@@ -28,7 +28,7 @@ def archive_repos(user):
         print 'archiving: {}'.format(tarball_filename)
         make_gzip_tarball(repo_path, repos_dir, tarball_filename)
         # delete repo once we have it archived
-        print 'removing: {} repo\n'.format(repository.name)
+        print 'deleting: {} repo\n'.format(repository.name)
         if exists(repo_path):
             shutil.rmtree(repo_path)
 
@@ -45,8 +45,10 @@ def archive_gists(user):
         gist_path = join(gists_dir, gist.id)
         Repo.clone_from(gist.git_pull_url, gist_path)
         tarball_filename = '{}.tar.gz'.format(gist.id)
+        print 'archiving: {}'.format(tarball_filename)
         make_gzip_tarball(gist_path, gists_dir, tarball_filename)
         # delete repo once we have it archived
+        print 'deleting: {}\n'.format(gist.id)
         if exists(gist_path):
             shutil.rmtree(gist_path)
 
