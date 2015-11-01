@@ -15,7 +15,6 @@ def make_gzip_tarball(source_dir, output_dir, tarball_filename):
 
 
 def clone_repo(repo, repo_path):
-    #print repository.get_archive_link()
     print 'cloning: {}'.format(repo.git_url)
     Repo.clone_from(repo.git_url, repo_path)
 
@@ -26,7 +25,7 @@ def get_repos(user_name):
     return user.get_repos()
 
 
-def archive_repo(repo, repos_dir):
+def archive_repo(repo, repos_dir, repo_path):
     tarball_filename = '{}.tar.gz'.format(repo.name)
     print 'creating archive: {}'.format(tarball_filename)
     make_gzip_tarball(repo_path, repos_dir, tarball_filename)
@@ -44,7 +43,7 @@ def export_repos(user_name, include_forked_repos=False):
         if repo.source is None:
             repo_path = join(repos_dir, repo.name)
             clone_repo(repo, repo_path)
-            archive_repo(repo, repo_path)
+            archive_repo(repo, repos_dir, repo_path)
 
 
 def archive_gists(user_name):
@@ -71,4 +70,4 @@ def archive_gists(user_name):
 if __name__ == '__main__':
     user = 'cgoldberg'
     export_repos(user)
-    #archive_gists(user)
+    archive_gists(user)
