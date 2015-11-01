@@ -6,6 +6,7 @@ from git import Repo
 from github import Github
 
 
+
 def make_gzip_tarball(source_dir, output_dir, tarball_filename):
     output_path = join(output_dir, tarball_filename)
     with tarfile.open(output_path, 'w:gz') as tar:
@@ -13,42 +14,55 @@ def make_gzip_tarball(source_dir, output_dir, tarball_filename):
     return output_path
 
 
-def archive_repos(user):
+def clone_repo(repo, repo_path):
+    #print repository.get_archive_link()
+    print 'cloning: {}'.format(repo.git_url)
+    Repo.clone_from(repo.git_url, repo_path)
+
+
+def get_repos(user_name):
+    github = Github()
+    user = github.get_user(user_name)
+    return user.get_repos()
+
+
+def archive_repo(repo, repos_dir):
+    tarball_filename = '{}.tar.gz'.format(repo.name)
+    print 'creating archive: {}'.format(tarball_filename)
+    make_gzip_tarball(repo_path, repos_dir, tarball_filename)
+    # delete repo after it's archived
+    print 'deleting repo: {}\n'.format(repo.name)
+    if exists(repo_path):
+        shutil.rmtree(repo_path)
+
+def export_repos(user_name, include_forked_repos=False):
     repos_dir = 'repo_backups'
     # clobber existing repos directory to start fresh
     if exists(repos_dir):
         shutil.rmtree(repos_dir)
-    github = Github()
-    user = github.get_user(user)
-    for repository in user.get_repos():
-        print 'cloning: {}'.format(repository.full_name)
-        repo_path = join(repos_dir, repository.name)
-        Repo.clone_from(repository.git_url, repo_path)
-        tarball_filename = '{}.tar.gz'.format(repository.name)
-        print 'archiving: {}'.format(tarball_filename)
-        make_gzip_tarball(repo_path, repos_dir, tarball_filename)
-        # delete repo once we have it archived
-        print 'deleting: {} repo\n'.format(repository.name)
-        if exists(repo_path):
-            shutil.rmtree(repo_path)
+    for repo in get_repos(user_name):
+        if repo.source is None:
+            repo_path = join(repos_dir, repo.name)
+            clone_repo(repo, repo_path)
+            archive_repo(repo, repo_path)
 
 
-def archive_gists(user):
+def archive_gists(user_name):
     gists_dir = 'gist_backups'
     # clobber existing gists directory to start fresh
     if exists(gists_dir):
         shutil.rmtree(gists_dir)
     github = Github()
-    user = github.get_user(user)
+    user = github.get_user(user_name)
     for gist in user.get_gists():
         print('cloning: {}'.format(gist.id))
         gist_path = join(gists_dir, gist.id)
         Repo.clone_from(gist.git_pull_url, gist_path)
         tarball_filename = '{}.tar.gz'.format(gist.id)
-        print 'archiving: {}'.format(tarball_filename)
+        print 'creating archive: {}'.format(tarball_filename)
         make_gzip_tarball(gist_path, gists_dir, tarball_filename)
-        # delete repo once we have it archived
-        print 'deleting: {}\n'.format(gist.id)
+        # delete repo after it's archived
+        print 'deleting repo: {}\n'.format(gist.id)
         if exists(gist_path):
             shutil.rmtree(gist_path)
 
@@ -56,5 +70,5 @@ def archive_gists(user):
 
 if __name__ == '__main__':
     user = 'cgoldberg'
-    archive_repos(user)
-    archive_gists(user)
+    export_repos(user)
+    #archive_gists(user)
