@@ -55,7 +55,7 @@ def export_gists(user_name):
     # clobber existing gists directory to start fresh
     if exists(gists_dir):
         shutil.rmtree(gists_dir)
-    github = Github()
+    github = Github('user', 'password')
     user = github.get_user(user_name)
     for gist in user.get_gists():
         print('cloning: {}'.format(gist.id))
