@@ -8,7 +8,8 @@
 - Copyright (c) 2015 [Corey Goldberg](https://github.com/cgoldberg)
 - License: [MIT](https://opensource.org/licenses/MIT)
 - Compatibility: Python 2.7
----
+
+----
 
 ### About:
 
