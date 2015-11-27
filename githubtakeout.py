@@ -1,11 +1,13 @@
 import logging
-from os.path import basename, join
+import os
 import shutil
 import tarfile
 
 import git
 from github import Github
 
+USER='cgoldberg'
+PASSWORD=''
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -13,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 def make_gzip_tarball(source_dir, output_dir, tarball_filename):
-    output_path = join(output_dir, tarball_filename)
+    output_path = os.path.join(output_dir, tarball_filename)
     with tarfile.open(output_path, 'w:gz') as tar:
-        tar.add(source_dir, arcname=basename(source_dir))
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
     return output_path
 
 
@@ -40,14 +42,14 @@ def export_repos(user_name, include_gists=True):
     github = Github(USER, PASSWORD)
     user = github.get_user(user_name)
     for repo in user.get_repos():
-        repo_path = join(repos_dir, repo.name)
+        repo_path = os.path.join(repos_dir, repo.name)
         # don't include forked repos
         if repo.source is None:
             clone_repo(repo.git_url, repo_path)
             archive_repo(repo.name, repos_dir, repo_path)
     if include_gists:
         for gist in user.get_gists():
-            gist_path = join(gists_dir, gist.id)
+            gist_path = os.path.join(gists_dir, gist.id)
             clone_repo(gist.git_pull_url, gist_path)
             archive_repo(gist.name, gists_dir, gist_path)
 
