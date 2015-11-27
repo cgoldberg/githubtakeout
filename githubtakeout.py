@@ -6,12 +6,16 @@ import tarfile
 import git
 from github import Github
 
-USER='cgoldberg'
-PASSWORD=''
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
+
+try:
+    USER = os.environ['USER']
+    PASSWORD = os.environ['PASSWORD']
+except KeyError as e:
+    raise SystemExit('USER and PASSWORD environment variables are required.')
 
 
 def make_gzip_tarball(source_dir, output_dir, tarball_filename):
