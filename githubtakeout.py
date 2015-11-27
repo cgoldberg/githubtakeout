@@ -1,9 +1,15 @@
+import logging
 from os.path import basename, join
 import shutil
 import tarfile
 
 import git
 from github import Github
+
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
+
 
 
 def make_gzip_tarball(source_dir, output_dir, tarball_filename):
@@ -14,19 +20,18 @@ def make_gzip_tarball(source_dir, output_dir, tarball_filename):
 
 
 def clone_repo(repo_url, repo_path):
-    print 'cloning: {}'.format(repo_url)
+    logger.info('cloning: {}'.format(repo_url))
     try:
         git.Repo.clone_from(repo_url, repo_path)
     except git.GitCommandError as e:
-        print(e)
+        logger.error(e)
 
 
 def archive_repo(repo_name, repos_dir, repo_path):
     tarball_filename = '{}.tar.gz'.format(repo_name)
-    print 'creating archive: {}'.format(tarball_filename)
+    logger.info('creating archive: {}'.format(tarball_filename))
     make_gzip_tarball(repo_path, repos_dir, tarball_filename)
-    # delete repo after it's archived
-    print 'deleting repo: {}\n'.format(repo_name)
+    logger.info('deleting repo: {}\n'.format(repo_name))
     shutil.rmtree(repo_path)
 
 
