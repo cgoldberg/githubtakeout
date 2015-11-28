@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    USER = os.environ['USER']
-    PASSWORD = os.environ['PASSWORD']
+    USER = os.environ['GITHUBUSER']
+    PASSWORD = os.environ['GITHUBPASSWORD']
 except KeyError as e:
-    raise SystemExit('USER and PASSWORD environment variables are required.')
+    raise SystemExit('GITHUBUSER and GITHUBPASSWORD environment'
+                     ' variables are required.')
 
 
 def make_gzip_tarball(source_dir, output_dir, tarball_filename):
@@ -53,11 +54,10 @@ def export_repos(user_name, include_gists=True):
             archive_repo(repo.name, repos_dir, repo_path)
     if include_gists:
         for gist in user.get_gists():
-            gist_path = os.path.join(gists_dir, gist.id)
+            gist_path = os.path.join(repos_dir, gist.id)
             clone_repo(gist.git_pull_url, gist_path)
-            archive_repo(gist.name, gists_dir, gist_path)
+            archive_repo(gist.name, repos_dir, gist_path)
 
 
 if __name__ == '__main__':
-    user = 'cgoldberg'
-    export_repos(user)
+    export_repos(USER)
