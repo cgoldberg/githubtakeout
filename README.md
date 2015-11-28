@@ -4,9 +4,9 @@
 
 ---
 
-- Development: [https://github.com/cgoldberg/githubtakeout](https://github.com/cgoldberg/githubtakeout)
 - Copyright (c) 2015 [Corey Goldberg](https://github.com/cgoldberg)
 - License: [MIT](https://opensource.org/licenses/MIT)
+- Development: [https://github.com/cgoldberg/githubtakeout](https://github.com/cgoldberg/githubtakeout)
 - Compatibility: Python 2.7
 
 ----
@@ -21,8 +21,18 @@ _githubtakeout_ is a data export tool for GitHub repositories.  It clones your p
 
 ### Run:
 
-Invoke `githubtakeout.py` from the command line, passing your GitHub username and password as environment variables.
+When executed, it will create a new `github_backups` directory, containing a tarball for each repo and gist.
 
-`$ USER='USERNAME' PASSWORD='PASSWORD' python githubtakeout.py`
+Set environment variables for GITHUBUSER and GITHUBPASSWORD, then invoke `githubtakeout.py` from the command line.
+
+For example, in bash shell:
+
+    $ export GITHUBUSER='USER'
+    $ export GITHUBPASSWORD='PASSWORD'
+    $ ./githubtakeout.py
+
+or simply:
+
+`$ GITHUBUSER='USER' GITHUBPASSWORD='PASSWORD' ./githubtakeout.py`
 
 ----
