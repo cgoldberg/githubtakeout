@@ -66,4 +66,4 @@ if __name__ == '__main__':
                         help='output directory')
     args = parser.parse_args()
     logger.info('cloning repos and storing tarballs in: %s\n' % args.dir)
-    export_repos(dir)
+    export_repos(args.dir)
