@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import shutil
@@ -12,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    USER = os.environ['GITHUBUSER']
-    PASSWORD = os.environ['GITHUBPASSWORD']
+    GITHUBUSER = os.environ['GITHUBUSER']
+    GITHUBPASSWORD = os.environ['GITHUBPASSWORD']
 except KeyError as e:
     raise SystemExit('GITHUBUSER and GITHUBPASSWORD environment'
-                     ' variables are required.')
+                     ' variables are required')
 
 
 def make_gzip_tarball(source_dir, output_dir, tarball_filename):
@@ -42,10 +43,10 @@ def archive_repo(repo_name, repos_dir, repo_path):
     shutil.rmtree(repo_path)
 
 
-def export_repos(user_name, include_gists=True):
+def export_repos(include_gists=True):
     repos_dir = 'github_backup'
-    github = Github(USER, PASSWORD)
-    user = github.get_user(user_name)
+    github = Github(GITHUBUSER, GITHUBPASSWORD)
+    user = github.get_user(GITHUBUSER)
     for repo in user.get_repos():
         repo_path = os.path.join(repos_dir, repo.name)
         # don't include forked repos
@@ -60,4 +61,9 @@ def export_repos(user_name, include_gists=True):
 
 
 if __name__ == '__main__':
-    export_repos(USER)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dir', nargs='?', default=os.getcwd(),
+                        help='output directory')
+    args = parser.parse_args()
+    logger.info('cloning repos and storing tarballs in: %s\n' % args.dir)
+    export_repos(dir)
