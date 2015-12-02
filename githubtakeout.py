@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 try:
     GITHUBUSER = os.environ['GITHUBUSER']
     GITHUBPASSWORD = os.environ['GITHUBPASSWORD']
-except KeyError as e:
+except KeyError:
     raise SystemExit('GITHUBUSER and GITHUBPASSWORD environment'
                      ' variables are required')
 
@@ -43,8 +43,8 @@ def archive_repo(repo_name, repos_dir, repo_path):
     shutil.rmtree(repo_path)
 
 
-def export_repos(include_gists=True):
-    repos_dir = 'github_backup'
+def export_repos(backup_dir, include_gists=True):
+    repos_dir = os.path.join(os.getcwd(), 'github_backup')
     github = Github(GITHUBUSER, GITHUBPASSWORD)
     user = github.get_user(GITHUBUSER)
     for repo in user.get_repos():
