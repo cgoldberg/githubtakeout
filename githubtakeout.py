@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import shutil
+import subprocess
 import tarfile
 
 import git
@@ -53,11 +54,12 @@ def export_repos(backup_dir, include_gists=True):
         if repo.source is None:
             clone_repo(repo.git_url, repo_path)
             archive_repo(repo.name, repos_dir, repo_path)
-    if include_gists:
-        for gist in user.get_gists():
-            gist_path = os.path.join(repos_dir, gist.id)
-            clone_repo(gist.git_pull_url, gist_path)
-            archive_repo(gist.name, repos_dir, gist_path)
+    # include_gists:
+    #   for gist in user.get_gists():
+    #       gist_path = os.path.join(repos_dir, gist.id)
+    #       clone_repo(gist.git_pull_url, gist_path)
+    #       archive_repo(gist.name, repos_dir, gist_path)
+    cloc_output = subprocess.call('cloc {}/*.tar.gz'.format(repos_dir), shell=True)
 
 
 if __name__ == '__main__':
