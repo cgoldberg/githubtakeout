@@ -13,11 +13,11 @@
 
 ### About:
 
-_githubtakeout_ is a data export tool for GitHub repositories.  It clones your personal repos and gists, and creates a tarball of each.
+_githubtakeout_ is a data export tool for git repositories hosted on GitHub.  It clones your personal repos and gists, and creates a tarball of each.
 
 ### Install:
 
-`pip install githubtakeout` (coming soon)
+`pip install githubtakeout`
 
 ### Run:
 
