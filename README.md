@@ -21,7 +21,7 @@ _githubtakeout_ is a data export tool for git repositories hosted on GitHub.  It
 
 ### Run:
 
-Set environment variables for GITHUBUSER and GITHUBPASSWORD, then invoke `githubtakeout.py` from the command line.
+Set environment variables for `GITHUBUSER` and `GITHUBPASSWORD`, then run `githubtakeout.py`.
 
 For example, in bash shell:
 
@@ -29,8 +29,8 @@ For example, in bash shell:
     $ export GITHUBPASSWORD='PASSWORD'
     $ ./githubtakeout.py
 
-or simply:
+or:
 
-`$ GITHUBUSER='USER' GITHUBPASSWORD='PASSWORD' ./githubtakeout.py`
+    $ GITHUBUSER='USER' GITHUBPASSWORD='PASSWORD' ./githubtakeout.py`
 
 ----
