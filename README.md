@@ -21,8 +21,6 @@ _githubtakeout_ is a data export tool for git repositories hosted on GitHub.  It
 
 ### Run:
 
-When executed, it will create a new `github_backups` directory, containing a tarball for each repo and gist.
-
 Set environment variables for GITHUBUSER and GITHUBPASSWORD, then invoke `githubtakeout.py` from the command line.
 
 For example, in bash shell:
