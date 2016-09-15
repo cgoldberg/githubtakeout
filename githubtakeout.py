@@ -2,7 +2,6 @@ import argparse
 import logging
 import os
 import shutil
-import subprocess
 import tarfile
 
 import git
@@ -41,31 +40,32 @@ def archive_repo(repo_name, repos_dir, repo_path):
     logger.info('creating archive: {}'.format(tarball_filename))
     make_gzip_tarball(repo_path, repos_dir, tarball_filename)
     logger.info('deleting repo: {}\n'.format(repo_name))
-    shutil.rmtree(repo_path)
 
 
 def export_repos(backup_dir, include_gists=True):
-    repos_dir = os.path.join(os.getcwd(), 'github_backup')
+    repos_dir = os.path.join(backup_dir, 'git_backups')
     github = Github(GITHUBUSER, GITHUBPASSWORD)
     user = github.get_user(GITHUBUSER)
     for repo in user.get_repos():
-        repo_path = os.path.join(repos_dir, repo.name)
         # don't include forked repos
         if repo.source is None:
             clone_repo(repo.git_url, repo_path)
             archive_repo(repo.name, repos_dir, repo_path)
-    # include_gists:
-    #   for gist in user.get_gists():
-    #       gist_path = os.path.join(repos_dir, gist.id)
-    #       clone_repo(gist.git_pull_url, gist_path)
-    #       archive_repo(gist.name, repos_dir, gist_path)
-    cloc_output = subprocess.call('cloc {}/*.tar.gz'.format(repos_dir), shell=True)
-
+            repo_path = os.path.join(repos_dir, repo.name)
+        if include_gists:
+            for gist in user.get_gists():
+                gist_path = os.path.join(repos_dir, gist.id)
+            clone_repo(gist.git_pull_url, gist_path)
+            archive_repo(gist.name, repos_dir, gist_path)
+            repo_path = os.path.join(repos_dir, gist.name)
+        shutil.rmtree(repo_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dir', nargs='?', default=os.getcwd(),
                         help='output directory')
+    parser.add_argument('gists', nargs='?', default=False,
+                        help='include gists')
     args = parser.parse_args()
     logger.info('cloning repos and storing tarballs in: %s\n' % args.dir)
-    export_repos(args.dir)
+    export_repos(args.dir, include_gists=args.gists)
