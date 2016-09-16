@@ -20,7 +20,7 @@ except KeyError:
                      ' variables are required')
 
 
-def make_gzip_tarball(source_dir, output_dir, tarball_filename):
+def create_gzip_tarball(source_dir, output_dir, output_filename):
     output_path = os.path.join(output_dir, tarball_filename)
     with tarfile.open(output_path, 'w:gz') as tar:
         tar.add(source_dir, arcname=os.path.basename(source_dir))
@@ -39,7 +39,7 @@ def archive_repo(repo_name, repos_dir, repo_path):
     tarball_filename = '{}.tar.gz'.format(repo_name)
     logger.info('creating archive: {}'.format(tarball_filename))
     make_gzip_tarball(repo_path, repos_dir, tarball_filename)
-    logger.info('deleting repo: {}\n'.format(repo_name))
+    logger.info('deleting original repo: {}\n'.format(repo_name))
 
 
 def export_repos(backup_dir, include_gists=True):
