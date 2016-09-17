@@ -12,19 +12,26 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
-try:
-    GITHUBUSER = os.environ['GITHUBUSER']
-    GITHUBPASSWORD = os.environ['GITHUBPASSWORD']
-except KeyError:
-    raise SystemExit('GITHUBUSER and GITHUBPASSWORD environment'
-                     ' variables are required')
+#try:
+#    GITHUBUSER = os.environ['GITHUBUSER']
+#    GITHUBPASSWORD = os.environ['GITHUBPASSWORD']
+#except KeyError:
+#    raise SystemExit('GITHUBUSER and GITHUBPASSWORD environment'
+#                     ' variables are required')
 
 
-def create_gzip_tarball(source_dir, output_dir, output_filename):
-    output_path = os.path.join(output_dir, tarball_filename)
+def create_zipped_tarball(source_dir, output_dir, output_filename):
+    output_path = os.path.join(output_dir, output_filename)
     with tarfile.open(output_path, 'w:gz') as tar:
         tar.add(source_dir, arcname=os.path.basename(source_dir))
     return output_path
+
+
+def archive_repo(repo_name, repos_dir, repo_path):
+    tarball_filename = '{}.tar.gz'.format(repo_name)
+    logger.info('creating archive: {}'.format(tarball_filename))
+    create_zipped_tarball(repo_path, repos_dir, tarball_filename)
+    logger.info('deleting original repo: {}\n'.format(repo_name))
 
 
 def clone_repo(repo_url, repo_path):
@@ -35,30 +42,27 @@ def clone_repo(repo_url, repo_path):
         logger.error(e)
 
 
-def archive_repo(repo_name, repos_dir, repo_path):
-    tarball_filename = '{}.tar.gz'.format(repo_name)
-    logger.info('creating archive: {}'.format(tarball_filename))
-    make_gzip_tarball(repo_path, repos_dir, tarball_filename)
-    logger.info('deleting original repo: {}\n'.format(repo_name))
-
-
 def export_repos(backup_dir, include_gists=True):
-    repos_dir = os.path.join(backup_dir, 'git_backups')
-    github = Github(GITHUBUSER, GITHUBPASSWORD)
-    user = github.get_user(GITHUBUSER)
+    username = 'cgoldberg'
+    #username = GITHUBUSER
+    #password = GITHUBPASSWORD
+    working_dir = os.path.join(backup_dir, 'git_backups')
+    #github = Github(username, password)
+    github = Github()
+    user = github.get_user(username)
     for repo in user.get_repos():
         # don't include forked repos
         if repo.source is None:
+            repo_path = os.path.join(working_dir, repo.name)
             clone_repo(repo.git_url, repo_path)
-            archive_repo(repo.name, repos_dir, repo_path)
-            repo_path = os.path.join(repos_dir, repo.name)
+            archive_repo(repo.name, working_dir, repo_path)
+            shutil.rmtree(repo_path)
         if include_gists:
             for gist in user.get_gists():
-                gist_path = os.path.join(repos_dir, gist.id)
-            clone_repo(gist.git_pull_url, gist_path)
-            archive_repo(gist.name, repos_dir, gist_path)
-            repo_path = os.path.join(repos_dir, gist.name)
-        shutil.rmtree(repo_path)
+                repo_path = os.path.join(working_dir, gist.id)
+                clone_repo(gist.git_pull_url, gist_path)
+                archive_repo(gist.name, working_dir, gist_path)
+                shutil.rmtree(repo_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
