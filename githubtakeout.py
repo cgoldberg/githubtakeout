@@ -20,24 +20,17 @@ logger = logging.getLogger(__name__)
 #                     ' variables are required')
 
 
-def create_zipped_tarball(source_dir, output_dir, output_filename):
-    output_path = os.path.join(output_dir, output_filename)
-    with tarfile.open(output_path, 'w:gz') as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
-    return output_path
+def archive(name, dir):
+    tarball = '{}.tar.gz'.format(os.path.join(dir, name))
+    logger.info('creating archive: {}'.format(tarball))
+    with tarfile.open(tarball, 'w:gz') as tar:
+        tar.add(dir)
 
 
-def archive_repo(repo_name, repos_dir, repo_path):
-    tarball_filename = '{}.tar.gz'.format(repo_name)
-    logger.info('creating archive: {}'.format(tarball_filename))
-    create_zipped_tarball(repo_path, repos_dir, tarball_filename)
-    logger.info('deleting original repo: {}\n'.format(repo_name))
-
-
-def clone_repo(repo_url, repo_path):
-    logger.info('cloning: {}'.format(repo_url))
+def clone_repo(remote_url, local_repo):
+    logger.info('cloning: {}'.format(remote_url))
     try:
-        git.Repo.clone_from(repo_url, repo_path)
+        git.Repo.clone_from(remote_url, local_repo)
     except git.GitCommandError as e:
         logger.error(e)
 
@@ -53,23 +46,23 @@ def export_repos(backup_dir, include_gists=True):
     for repo in user.get_repos():
         # don't include forked repos
         if repo.source is None:
-            repo_path = os.path.join(working_dir, repo.name)
-            clone_repo(repo.git_url, repo_path)
-            archive_repo(repo.name, working_dir, repo_path)
-            shutil.rmtree(repo_path)
-        if include_gists:
-            for gist in user.get_gists():
-                repo_path = os.path.join(working_dir, gist.id)
-                clone_repo(gist.git_pull_url, gist_path)
-                archive_repo(gist.name, working_dir, gist_path)
-                shutil.rmtree(repo_path)
+            local_repo = os.path.join(working_dir, repo.name)
+            clone_repo(repo.git_url, local_repo)
+            archive(repo.name, local_repo)
+            shutil.rmtree(local_repo)
+    if include_gists:
+        for gist in user.get_gists():
+            local_repo = os.path.join(working_dir, gist.id)
+            clone_repo(gist.git_pull_url, local_repo)
+            archive(gist.id, working_dir)
+            shutil.rmtree(local_repo)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dir', nargs='?', default=os.getcwd(),
                         help='output directory')
-    parser.add_argument('gists', nargs='?', default=False,
+    parser.add_argument('--gists', default=False, action="store_true",
                         help='include gists')
     args = parser.parse_args()
-    logger.info('cloning repos and storing tarballs in: %s\n' % args.dir)
+    logger.info('creating tarballs in: %s\n' % args.dir)
     export_repos(args.dir, include_gists=args.gists)
