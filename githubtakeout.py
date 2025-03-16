@@ -25,8 +25,8 @@ def archive(name, dir):
 def clone_repo(remote_url, local_repo):
     logger.info(f'cloning: {remote_url} to {local_repo}')
     try:
-        pass
-        git.Repo.clone_from(remote_url, local_repo)
+        # shallow clone (no commit history)
+        git.Repo.clone_from(remote_url, local_repo, multi_options=['--depth=1'])
     except git.GitCommandError as e:
         logger.error(e)
 
@@ -47,9 +47,9 @@ def clone_repos(username, base_dir, include_gists=True, list=False):
         #    pass
         #else:
         if list:
-            logger.info(repo.git_url)
+            logger.info(repo.clone_url)
         else:
-            clone_repo(repo.git_url, local_repo)
+            clone_repo(repo.clone_url, local_repo)
             #archive(repo.name, local_repo)
             #shutil.rmtree(local_repo)
     if include_gists:
@@ -63,6 +63,7 @@ def clone_repos(username, base_dir, include_gists=True, list=False):
                 clone_repo(gist.git_pull_url, local_repo)
                 #archive(gist.id, working_dir)
                 #shutil.rmtree(local_repo)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
