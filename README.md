@@ -29,7 +29,7 @@ $ source venv/bin/activate
 
 ### Usage:
 
-````
+```
 usage: githubtakeout.py [-h] [--gists] [--list] [--dir DIR] username
 
 positional arguments:
