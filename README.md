@@ -18,11 +18,13 @@ It clones your personal repos and gists, and creates a tarball of each.
 
 ## Run:
 
-### Clone:
+### Clone Repo and Create/Activate Virtual Environment:
 
 ```
 $ git clone https://github.com/cgoldberg/githubtakeout.git
 $ cd ./githubtakeout
+$ python3 -m venv venv
+$ source venv/bin/activate
 ```
 
 ### Usage:
