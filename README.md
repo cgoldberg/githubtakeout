@@ -1,36 +1,43 @@
 # githubtakeout
 
-### Archive your git repos from GitHub
+## Archive your public Git repos and Gists from GitHub
 
 ---
 
-- Copyright (c) 2015 [Corey Goldberg](https://github.com/cgoldberg)
+- Copyright (c) 2015-2025 [Corey Goldberg](https://github.com/cgoldberg)
 - License: [MIT](https://opensource.org/licenses/MIT)
 - Development: [https://github.com/cgoldberg/githubtakeout](https://github.com/cgoldberg/githubtakeout)
-- Compatibility: Python 2.7
+- Compatibility: Python 3
 
 ----
 
-### About:
+## About:
 
-_githubtakeout_ is a data export tool for git repositories hosted on GitHub.  It clones your personal repos and gists, and creates a tarball of each.
+_githubtakeout_ is a data export tool for public git repositories hosted on GitHub.
+It clones your personal repos and gists, and creates a tarball of each.
 
-### Install:
+## Run:
 
-`pip install githubtakeout`
+### Clone:
 
-### Run:
+```
+$ git clone https://github.com/cgoldberg/githubtakeout.git
+$ cd ./githubtakeout
+```
 
-Set environment variables for `GITHUBUSER` and `GITHUBPASSWORD`, then run `githubtakeout.py`.
+### Usage:
 
-For example, in bash shell:
+````
+usage: githubtakeout.py [-h] [--gists] [--list] [--dir DIR] username
 
-    $ export GITHUBUSER='USER'
-    $ export GITHUBPASSWORD='PASSWORD'
-    $ ./githubtakeout.py
+positional arguments:
+  username    GitHub username
 
-or:
-
-    $ GITHUBUSER='USER' GITHUBPASSWORD='PASSWORD' ./githubtakeout.py`
+options:
+  -h, --help  show this help message and exit
+  --gists     include gists
+  --list      list repos only
+  --dir DIR   output directory
+```
 
 ----
