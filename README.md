@@ -7,7 +7,6 @@
 - Copyright (c) 2015-2025 [Corey Goldberg](https://github.com/cgoldberg)
 - License: [MIT](https://opensource.org/licenses/MIT)
 - Development: [https://github.com/cgoldberg/githubtakeout](https://github.com/cgoldberg/githubtakeout)
-- Compatibility: Python 3
 
 ----
 
@@ -19,12 +18,19 @@ It clones your personal repoos, and creates a tarball of each.
 By default, it doesn't save commit history (.git directories) or Gist repositories
 (both can be enabled with command line options).
 
+## Requirements:
+- Python 3.7+
+- Git 1.7+
+- Python packages:
+    - GitPython
+    - PyGithub
+
 ## Run:
 
 ### Clone Repo, Create/Activate Virtual Environment, Install Dependencies, Run:
 
 ```
-git clone https://github.com/cgoldberg/githubtakeout.git
+git clone git@github.com:cgoldberg/githubtakeout.git
 cd ./githubtakeout
 python3 -m venv venv
 source venv/bin/activate
@@ -47,5 +53,3 @@ options:
   --list      list repos only
   --dir DIR   output directory
 ```
-
-----
