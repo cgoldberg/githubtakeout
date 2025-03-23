@@ -1,6 +1,6 @@
 # githubtakeout
 
-## Archive your public Git repos and Gists from GitHub
+## Archive public Git repos and Gists from GitHub
 
 ---
 
@@ -12,11 +12,12 @@
 
 ## About:
 
-_githubtakeout_ is a data export tool for archiving public Git repositories hosted on GitHub.
-It clones your personal repoos, and creates a tarball of each.
+`githubtakeout.py` is a data export tool for archiving Git repositories hosted on GitHub.
+It clones a user's public repos, and creates a tarball of each.
 
-By default, it doesn't save commit history or branches (`.git` directory) or Gist repositories
-(both can be enabled with command line options).
+By default, it doesn't save commit history or branches (`.git` directory) or "gist"
+repositories (both can be enabled with command line options). It also doesn't access
+private repositories or secret gists.
 
 ## Requirements:
 - Python 3.7+
