@@ -87,7 +87,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('username', help='GitHub username')
     parser.add_argument('--gists', default=False, action="store_true", help='include gists')
-    parser.add_argument('--history', default=False, action="store_true", help='include commit history (.git directories)')
+    parser.add_argument('--history', default=False, action="store_true", help='include commit history and branches (.git directory)')
     parser.add_argument('--list', default=False, action="store_true", help='list repos only')
     parser.add_argument('--dir', default=os.getcwd(), help='output directory')
     args = parser.parse_args()

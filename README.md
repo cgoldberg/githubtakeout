@@ -15,7 +15,7 @@
 _githubtakeout_ is a data export tool for archiving public Git repositories hosted on GitHub.
 It clones your personal repoos, and creates a tarball of each.
 
-By default, it doesn't save commit history (.git directories) or Gist repositories
+By default, it doesn't save commit history or branches (`.git` directory) or Gist repositories
 (both can be enabled with command line options).
 
 ## Requirements:
@@ -49,7 +49,7 @@ positional arguments:
 options:
   -h, --help  show this help message and exit
   --gists     include gists
-  --history   include commit history (.git directories)
+  --history   include commit history and branches (.git directory)
   --list      list repos only
   --dir DIR   output directory
 ```
