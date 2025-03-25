@@ -26,7 +26,7 @@ private repositories or secret gists.
     - GitPython
     - PyGithub
 
-## Installation:
+## Installing and Running:
 
 ### Install from PyPI:
 
@@ -43,7 +43,7 @@ pip install githubtakeout
 githubtakeout <github username>
 ```
 
-### Clone Repo, Create/Activate Virtual Environment, Install, Run:
+### Clone Repo, Create/Activate Virtual Environment, Install from Source, Run:
 
 ```
 git clone git@github.com:cgoldberg/githubtakeout.git
