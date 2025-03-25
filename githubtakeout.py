@@ -118,7 +118,7 @@ if __name__ == '__main__':
         help='GitHub username'
     )
     parser.add_argument(
-        '--archive-format',
+        '--format',
         default='zip',
         help='archive format (tar, zip)'
     )
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     main(
         username=args.username,
         base_dir=args.dir,
-        archive_format=args.archive_format,
+        archive_format=args.format,
         include_gists=args.gists,
         include_history=args.history,
         list=args.list
