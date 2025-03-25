@@ -100,7 +100,8 @@ def main(username, base_dir, archive_format, include_gists, include_history, lis
     if include_gists:
         gists = user.get_gists()
         num_gists = len([1 for _ in gists])
-        logger.info(f'\nfound {num_gists} gists\n')
+        logger.info('')
+        logger.info(f'found {num_gists} gists for user "{username}"\n')
         for gist in gists:
             local_repo_dir = os.path.join(working_dir, gist.id)
             if list:
