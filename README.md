@@ -13,7 +13,7 @@
 ## About:
 
 `githubtakeout.py` is a data export tool for archiving Git repositories hosted on GitHub.
-It clones a user's public repos, and creates a tarball of each.
+It clones a user's public repos, and creates an archive of each.
 
 By default, it doesn't save commit history or branches (`.git` directory) or "gist"
 repositories (both can be enabled with command line options). It also doesn't access
@@ -42,15 +42,16 @@ pip install -r requirements.txt
 ### Usage:
 
 ```
-usage: githubtakeout.py [-h] [--gists] [--history] [--list] [--dir DIR] username
+usage: githubtakeout.py [-h] [--format FORMAT] [--dir DIR] [--gists] [--history] [--list] username
 
 positional arguments:
-  username    GitHub username
+  username         GitHub username
 
 options:
-  -h, --help  show this help message and exit
-  --gists     include gists
-  --history   include commit history and branches (.git directory)
-  --list      list repos only
-  --dir DIR   output directory
+  -h, --help       show this help message and exit
+  --format FORMAT  archive format (tar, zip)
+  --dir DIR        output directory
+  --gists          include gists
+  --history        include commit history and branches (.git directory)
+  --list           list repos only
 ```
