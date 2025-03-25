@@ -75,13 +75,17 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
 
 def main(username, base_dir, archive_format, include_gists, include_history, list):
     working_dir = os.path.join(base_dir, 'backups')
-    if not list:
-        logger.info(f'creating archives in: {working_dir}\n')
     gh = github.Github()
-    user = gh.get_user(username)
+    try:
+        user = gh.get_user(username)
+    except github.GithubException:
+        print(f'Error: user "{username}" not found on GitHub')
+        exit(1)
     repos = user.get_repos()
     num_repos = len([1 for _ in repos])
-    logger.info(f'found {num_repos} repos\n')
+    if not list:
+        logger.info(f'creating archives in: {working_dir}\n')
+    logger.info(f'found {num_repos} repos for user "{username}"\n')
     for repo in repos:
         local_repo_dir = os.path.join(working_dir, repo.name)
         if list:
