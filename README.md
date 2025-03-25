@@ -15,28 +15,43 @@
 `githubtakeout.py` is a data export tool for archiving Git repositories hosted on GitHub.
 It clones a user's public repos, and creates an archive of each.
 
-By default, it doesn't save commit history or branches (`.git` directory) or "gist"
+By default, it doesn't save commit history or branches (`.git` directory), or Gist
 repositories (both can be enabled with command line options). It also doesn't access
 private repositories or secret gists.
 
 ## Requirements:
-- Python 3.7+
+- Python 3.9+
 - Git 1.7+
 - Python packages:
     - GitPython
     - PyGithub
 
-## Run:
+## Installation:
 
-### Clone Repo, Create/Activate Virtual Environment, Install Dependencies, Run:
+### Install from PyPI:
+
+```
+pip install githubtakeout
+```
+
+### Create/Activate Virtual Environment, Install from PyPI, Run:
+
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install githubtakeout
+githubtakeout <github username>
+```
+
+### Clone Repo, Create/Activate Virtual Environment, Install, Run:
 
 ```
 git clone git@github.com:cgoldberg/githubtakeout.git
 cd ./githubtakeout
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-./githubtakeout.py <github username>
+pip install .
+githubtakeout <github username>
 ```
 
 ### Usage:
