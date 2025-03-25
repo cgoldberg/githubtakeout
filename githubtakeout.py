@@ -5,7 +5,9 @@ import logging
 import os
 import shutil
 import tarfile
+import zipfile
 
+from pathlib import Path
 from timeit import default_timer
 
 import git
@@ -16,21 +18,30 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
-def archive(local_repo_dir, is_gist=False):
+def archive(local_repo_dir, archive_format='zip', is_gist=False):
+    if archive_format not in ('tar', 'zip'):
+        raise ValueError(f'{archive_format} is not a valid archive format')
     base_name = os.path.basename(local_repo_dir)
-    parent_dir = os.path.dirname(local_repo_dir)
+    extension = 'tar.gz' if archive_format == 'tar' else archive_format
+    archive_name = f'{base_name}.{extension}'
     if is_gist:
-        name = f'gist-{base_name}.tar.gz'
-    else:
-        name = f'{base_name}.tar.gz'
-    tarball_path = os.path.join(parent_dir, name)
-    logger.info(f'creating archive: {tarball_path}')
-    with tarfile.open(tarball_path, 'w:gz') as tar:
-        tar.add(local_repo_dir, arcname=base_name)
-    return tarball_path
+        archive_name = f'gist-{archive_name}'
+    parent_dir = os.path.dirname(local_repo_dir)
+    archive_path = os.path.join(parent_dir, archive_name)
+    logger.info(f'creating archive: {archive_path}')
+    if archive_format == 'tar':
+        with tarfile.open(archive_path, 'w:gz') as tar:
+            tar.add(local_repo_dir, arcname=base_name)
+    elif archive_format == 'zip':
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zip:
+            repo_path = Path(local_repo_dir)
+            for entry in repo_path.rglob('*'):
+                path = os.path.join(base_name, entry.relative_to(repo_path))
+                zip.write(entry, arcname=path)
+    return archive_path
 
 
-def clone_and_archive_repo(repo_url, local_repo_dir, include_history, is_gist=False):
+def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
     try:
         shutil.rmtree(local_repo_dir)
     except FileNotFoundError:
@@ -52,8 +63,8 @@ def clone_and_archive_repo(repo_url, local_repo_dir, include_history, is_gist=Fa
         return
     elapsed = default_timer() - start
     logger.info(f'elapsed time: {elapsed:.3f} secs')
-    tarball_path = archive(local_repo_dir, is_gist=is_gist)
-    size_kb = os.path.getsize(tarball_path) / 1024
+    archive_path = archive(local_repo_dir, archive_format, is_gist)
+    size_kb = os.path.getsize(archive_path) / 1024
     logger.info(f'archive size: {size_kb:.2f} KB')
     logger.info('deleting repo')
     try:
@@ -62,8 +73,8 @@ def clone_and_archive_repo(repo_url, local_repo_dir, include_history, is_gist=Fa
         pass
     logger.info('')
 
-def main(username, base_dir, include_gists=True, include_history=False, list=False):
-    working_dir = os.path.join(base_dir, 'github_backups')
+def main(username, base_dir, archive_format, include_gists, include_history, list):
+    working_dir = os.path.join(base_dir, 'backups')
     if not list:
         logger.info(f'creating archives in: {working_dir}\n')
     gh = github.Github()
@@ -79,6 +90,7 @@ def main(username, base_dir, include_gists=True, include_history=False, list=Fal
             clone_and_archive_repo(
                 repo.clone_url,
                 local_repo_dir,
+                archive_format,
                 include_history
             )
     if include_gists:
@@ -93,6 +105,7 @@ def main(username, base_dir, include_gists=True, include_history=False, list=Fal
                 clone_and_archive_repo(
                     gist.git_pull_url,
                     local_repo_dir,
+                    archive_format,
                     include_history,
                     is_gist=True
                 )
@@ -103,6 +116,11 @@ if __name__ == '__main__':
     parser.add_argument(
         'username',
         help='GitHub username'
+    )
+    parser.add_argument(
+        '--archive-format',
+        default='zip',
+        help='archive format (tar, zip)'
     )
     parser.add_argument(
         '--dir',
@@ -129,8 +147,9 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     main(
-        args.username,
+        username=args.username,
         base_dir=args.dir,
+        archive_format=args.archive_format,
         include_gists=args.gists,
         include_history=args.history,
         list=args.list
