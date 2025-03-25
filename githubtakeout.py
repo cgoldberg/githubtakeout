@@ -73,7 +73,7 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
         pass
     logger.info('')
 
-def main(username, base_dir, archive_format, include_gists, include_history, list):
+def run(username, base_dir, archive_format, include_gists, include_history, list):
     working_dir = os.path.join(base_dir, 'backups')
     gh = github.Github()
     try:
@@ -115,8 +115,7 @@ def main(username, base_dir, archive_format, include_gists, include_history, lis
                     is_gist=True
                 )
 
-
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'username',
@@ -151,7 +150,7 @@ if __name__ == '__main__':
         help='list repos only'
     )
     args = parser.parse_args()
-    main(
+    run(
         username=args.username,
         base_dir=args.dir,
         archive_format=args.format,
@@ -159,3 +158,7 @@ if __name__ == '__main__':
         include_history=args.history,
         list=args.list
     )
+
+
+if __name__ == '__main__':
+    main()
