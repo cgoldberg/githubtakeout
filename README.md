@@ -1,6 +1,6 @@
 # githubtakeout
 
-## Archive public Git repos and Gists from GitHub
+## Archive public Git Repos and Gists from GitHub
 
 ---
 
