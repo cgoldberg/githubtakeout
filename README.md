@@ -24,7 +24,11 @@ When you run the program, archives of your repos will be saved in a directory na
 `backups` inside your current working directory, unless a different location is specified
 using the `--dir` option.
 
+Archives are saved in compressed zip format (`.zip`) by default, but can also be saved
+as tarballs (`.tar.gz`) using the `--format=tar` option.
+
 ## Requirements:
+
 - Python 3.9+
 - Git 1.7+
 - Python packages:
@@ -62,15 +66,15 @@ githubtakeout <github username>
 ### Usage:
 
 ```
-usage: githubtakeout.py [-h] [--format FORMAT] [--dir DIR] [--gists] [--history] [--list] username
+usage: githubtakeout [-h] [--dir DIR] [--format FORMAT] [--gists] [--history] [--list] username
 
 positional arguments:
   username         GitHub username
 
 options:
   -h, --help       show this help message and exit
-  --format FORMAT  archive format (tar, zip)
   --dir DIR        output directory
+  --format FORMAT  archive format (tar, zip)
   --gists          include gists
   --history        include commit history and branches (.git directory)
   --list           list repos only

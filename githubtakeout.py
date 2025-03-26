@@ -122,14 +122,14 @@ def main():
         help='GitHub username'
     )
     parser.add_argument(
-        '--format',
-        default='zip',
-        help='archive format (tar, zip)'
-    )
-    parser.add_argument(
         '--dir',
         default=os.getcwd(),
         help='output directory'
+    )
+    parser.add_argument(
+        '--format',
+        default='zip',
+        help='archive format (tar, zip)'
     )
     parser.add_argument(
         '--gists',
