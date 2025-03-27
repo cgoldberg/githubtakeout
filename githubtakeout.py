@@ -4,6 +4,7 @@ import argparse
 import getpass
 import logging
 import os
+import stat
 import shutil
 import tarfile
 import urllib
@@ -15,8 +16,7 @@ from timeit import default_timer
 import git
 import github
 
-
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -30,62 +30,108 @@ def add_creds(url, username, token):
         new_url = urllib.parse.urlunparse(url_parts._replace(netloc=netloc))
     return new_url
 
-
-def archive(local_repo_dir, archive_format='zip', is_gist=False):
-    if archive_format not in ('tar', 'zip'):
-        raise ValueError(f'{archive_format} is not a valid archive format')
+def archive(local_repo_dir, archive_format="zip", is_gist=False):
+    if archive_format not in ("tar", "zip"):
+        raise ValueError(f"{archive_format} is not a valid archive format")
     base_name = os.path.basename(local_repo_dir)
-    extension = 'tar.gz' if archive_format == 'tar' else archive_format
-    archive_name = f'{base_name}.{extension}'
+    extension = "tar.gz" if archive_format == "tar" else archive_format
+    archive_name = f"{base_name}.{extension}"
     if is_gist:
-        archive_name = f'gist-{archive_name}'
+        archive_name = f"gist-{archive_name}"
     parent_dir = os.path.dirname(local_repo_dir)
-    archive_path = os.path.join(parent_dir, archive_name)
-    logger.info(f'creating archive: {archive_path}')
-    if archive_format == 'tar':
-        with tarfile.open(archive_path, 'w:gz') as tar:
-            tar.add(local_repo_dir, arcname=base_name)
-    elif archive_format == 'zip':
-        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zip:
+    archive_path: str = os.path.join(parent_dir, archive_name)
+    logger.info(f"creating archive: {archive_path}")
+    if archive_format == "tar":
+        with tarfile.open(archive_path, "w:gz") as tar_archive:
+            tar_archive.add(local_repo_dir, arcname=base_name)
+    elif archive_format == "zip":
+        with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zip_archive:
             repo_path = Path(local_repo_dir)
-            for entry in repo_path.rglob('*'):
+            for entry in repo_path.rglob("*"):
                 path = os.path.join(base_name, entry.relative_to(repo_path))
-                zip.write(entry, arcname=path)
+                zip_archive.write(entry, arcname=path)
     return archive_path
 
 
-def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
+# On windows, you can frequently get permssion errors trying to delete
+# .git artifacts in the downloaded archive
+def safe_unlink(path: Path):
+    if not path.exists():
+        return
+
     try:
-        shutil.rmtree(local_repo_dir)
-    except FileNotFoundError:
-        pass
-    repo_path = urllib.parse.urlparse(repo_url).path
-    logger.info(f'cloning repo: {repo_path} to {local_repo_dir}')
+        path.unlink()
+    except PermissionError:
+        try:
+            # Try to make it writable
+            os.chmod(path, stat.S_IWRITE)
+            path.unlink()
+        except Exception as e:
+            logger.info(f"Failed to delete file {path}: {e}")
+
+
+# shutil.rmtree follows sylinks and doesn't handle read-only files or permission errors cleanly
+def safe_rmtree(path: str):
+    path = Path(path)
+    if not path.exists():
+        return
+
+    if not path.is_dir():
+        raise ValueError(f"{path} is not a directory")
+
+    for child in path.iterdir():
+        if child.is_symlink():
+            safe_unlink(child)
+        elif child.is_dir():
+            safe_rmtree(child)
+        else:
+            safe_unlink(child)
+
+    try:
+        path.rmdir()
+    except PermissionError:
+        try:
+            # Try to make it writable
+            os.chmod(path, stat.S_IWRITE)
+            path.rmdir()
+        except Exception as e:
+            logger.info(f"Failed to remove {path}: {e}")
+
+
+def clone_and_archive_repo(
+    repo_url: str,
+    local_repo_dir: str,
+    archive_format: str,
+    include_history: bool,
+    is_gist: bool = False,
+):
+    safe_rmtree(local_repo_dir)
+    logger.info(f"cloning repo: {repo_url} to {local_repo_dir}")
     start = default_timer()
     try:
         if include_history:
             git.Repo.clone_from(repo_url, local_repo_dir)
         else:
             # shallow clone (no commit history or branches)
-            git.Repo.clone_from(repo_url, local_repo_dir, multi_options=['--depth=1'])
+            git.Repo.clone_from(repo_url, local_repo_dir, multi_options=["--depth=1"])
             try:
-                shutil.rmtree(os.path.join(local_repo_dir, '.git'))
+                safe_rmtree(os.path.join(local_repo_dir, ".git"))
             except FileNotFoundError:
                 pass
     except git.GitCommandError as e:
         logger.error(e)
         return
     elapsed = default_timer() - start
-    logger.info(f'elapsed time: {elapsed:.3f} secs')
+    logger.info(f"elapsed time: {elapsed:.3f} secs")
     archive_path = archive(local_repo_dir, archive_format, is_gist)
     size_kb = os.path.getsize(archive_path) / 1024
-    logger.info(f'archive size: {size_kb:.2f} KB')
-    logger.info('deleting repo')
-    try:
-        shutil.rmtree(local_repo_dir)
-    except FileNotFoundError:
-        pass
-    logger.info('')
+    logger.info(f"archive size: {size_kb:.2f} KB")
+    logger.info("deleting repo")
+    safe_rmtree(local_repo_dir)
+    elapsed = default_timer() - start
+    logger.info(
+        f"successfully backed up {repo_url} to {archive_path} in {elapsed:.3f} secs\n\n"
+    )
 
 
 def get_user(username, prompt_token):
@@ -130,34 +176,43 @@ def get_user(username, prompt_token):
     gists = user.get_gists()
     return user, repos, gists, token
 
-
-def run(username, base_dir, archive_format, include_gists, include_history, list, prompt_token):
-    working_dir = os.path.join(base_dir, 'backups')
+def run(
+    username,       # type: str
+    base_dir,       # type: str
+    archive_format, # type: str
+    include_gists,  # type: bool
+    include_history,# type: bool
+    list_only       # type: bool
+    prompt_token    # type: str
+):
+    working_dir = os.path.join(base_dir, "backups")
     user, repos, gists, token = get_user(username, prompt_token)
-    num_repos = repos.totalCount
-    if not list:
-        logger.info(f'creating archives in: {working_dir}\n')
+    repos = user.get_repos()
+    num_repos = len([1 for _ in repos])
+    if not list_only:
+        logger.info(f"creating archives in: {working_dir}\n")
     logger.info(f'found {num_repos} repos for user "{username}"\n')
     for repo in repos:
         local_repo_dir = os.path.join(working_dir, repo.name)
         url = add_creds(repo.clone_url, username, token)
-        if list:
+        if list_only:
             logger.info(url)
         else:
-            clone_and_archive_repo(
+               clone_and_archive_repo(
                 url,
                 local_repo_dir,
                 archive_format,
                 include_history
             )
     if include_gists:
-        num_gists = gists.totalCount
-        logger.info('')
+        gists = user.get_gists()
+        num_gists = len([1 for _ in gists])
+        logger.info("")
         logger.info(f'found {num_gists} gists for user "{username}"\n')
         for gist in gists:
             local_repo_dir = os.path.join(working_dir, gist.id)
             url = add_creds(gist.git_pull_url, username, token)
-            if list:
+            if list_only:
                 logger.info(url)
             else:
                 clone_and_archive_repo(
@@ -165,43 +220,26 @@ def run(username, base_dir, archive_format, include_gists, include_history, list
                     local_repo_dir,
                     archive_format,
                     include_history,
-                    is_gist=True
+                    is_gist=True,
                 )
 
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("username", help="GitHub username")
+    parser.add_argument("--dir", default=os.getcwd(), help="output directory")
+    parser.add_argument("--format", default="zip", help="archive format (tar, zip)")
     parser.add_argument(
-        'username',
-        help='GitHub username'
+        "--gists", default=False, action="store_true", help="include gists"
     )
     parser.add_argument(
-        '--dir',
-        default=os.getcwd(),
-        help='output directory'
-    )
-    parser.add_argument(
-        '--format',
-        default='zip',
-        help='archive format (tar, zip)'
-    )
-    parser.add_argument(
-        '--gists',
+        "--history",
         default=False,
-        action='store_true',
-        help='include gists'
+        action="store_true",
+        help="include commit history and branches (.git directory)",
     )
     parser.add_argument(
-        '--history',
-        default=False,
-        action='store_true',
-        help='include commit history and branches (.git directory)'
-    )
-    parser.add_argument(
-        '--list',
-        default=False,
-        action='store_true',
-        help='list repos only'
+        "--list", default=False, action="store_true", help="list repos only"
     )
     parser.add_argument(
         '--token',
@@ -216,10 +254,10 @@ def main():
         archive_format=args.format,
         include_gists=args.gists,
         include_history=args.history,
-        list=args.list,
+        list_only=args.list,
         prompt_token=args.token
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
