@@ -5,7 +5,6 @@ import getpass
 import logging
 import os
 import stat
-import shutil
 import tarfile
 import urllib
 import zipfile
@@ -53,7 +52,7 @@ def archive(local_repo_dir, archive_format="zip", is_gist=False):
     return archive_path
 
 
-# On windows, you can frequently get permssion errors trying to delete
+# On windows, you can frequently get permission errors trying to delete
 # .git artifacts in the downloaded archive
 def safe_unlink(path: Path):
     if not path.exists():
@@ -70,7 +69,7 @@ def safe_unlink(path: Path):
             logger.info(f"Failed to delete file {path}: {e}")
 
 
-# shutil.rmtree follows sylinks and doesn't handle read-only files or permission errors cleanly
+# shutil.rmtree follows symlinks and doesn't handle read-only files or permission errors cleanly
 def safe_rmtree(path: str):
     path = Path(path)
     if not path.exists():
