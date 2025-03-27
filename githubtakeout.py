@@ -201,8 +201,7 @@ def run(
     # type: (str, str, str, bool, bool, bool, bool) -> None
     working_dir = os.path.join(base_dir, "backups")
     user, repos, gists, token = get_user(username, prompt_token)
-    repos = user.get_repos()
-    num_repos = len([1 for _ in repos])
+    num_repos = repos.totalCount
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
     logger.info(f'found {num_repos} repos for user "{username}"\n')
@@ -214,8 +213,7 @@ def run(
         else:
             clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
     if include_gists:
-        gists = user.get_gists()
-        num_gists = len([1 for _ in gists])
+        num_gists = gists.totalCount
         logger.info("")
         logger.info(f'found {num_gists} gists for user "{username}"\n')
         for gist in gists:
@@ -225,11 +223,7 @@ def run(
                 logger.info(url)
             else:
                 clone_and_archive_repo(
-                    url,
-                    local_repo_dir,
-                    archive_format,
-                    include_history,
-                    is_gist=True,
+                    url, local_repo_dir, archive_format, include_history, is_gist=True
                 )
 
 
