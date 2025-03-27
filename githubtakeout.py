@@ -8,28 +8,37 @@ import stat
 import tarfile
 import urllib
 import zipfile
+import git
+import github
 
 from pathlib import Path
 from timeit import default_timer
-
-import git
-import github
+from github.AuthenticatedUser import AuthenticatedUser
+from github.Gist import Gist
+from github.NamedUser import NamedUser
+from github.PaginatedList import PaginatedList
+from github.Repository import Repository
+from urllib import parse
+from typing import cast
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def add_creds(url, username, token):
+    # type: (str, str, object) -> str
     if token is None:
-        new_url = url
+        return url
     else:
         username = urllib.parse.quote(username)
         url_parts = urllib.parse.urlparse(url)
-        netloc = f'{username}:{token}@{url_parts.netloc}'
-        new_url = urllib.parse.urlunparse(url_parts._replace(netloc=netloc))
-    return new_url
+        netloc = f"{username}:{token}@{url_parts.netloc}"
+        url_parts = url_parts._replace(netloc=netloc)
+        return cast(str, urllib.parse.urlunparse(url_parts))
+
 
 def archive(local_repo_dir, archive_format="zip", is_gist=False):
+    # type: (str, str, bool) -> str
     if archive_format not in ("tar", "zip"):
         raise ValueError(f"{archive_format} is not a valid archive format")
     base_name = os.path.basename(local_repo_dir)
@@ -38,7 +47,7 @@ def archive(local_repo_dir, archive_format="zip", is_gist=False):
     if is_gist:
         archive_name = f"gist-{archive_name}"
     parent_dir = os.path.dirname(local_repo_dir)
-    archive_path: str = os.path.join(parent_dir, archive_name)
+    archive_path = os.path.join(parent_dir, archive_name)
     logger.info(f"creating archive: {archive_path}")
     if archive_format == "tar":
         with tarfile.open(archive_path, "w:gz") as tar_archive:
@@ -54,7 +63,8 @@ def archive(local_repo_dir, archive_format="zip", is_gist=False):
 
 # On windows, you can frequently get permission errors trying to delete
 # .git artifacts in the downloaded archive
-def safe_unlink(path: Path):
+def safe_unlink(path):
+    # type: (Path) -> None
     if not path.exists():
         return
 
@@ -70,7 +80,8 @@ def safe_unlink(path: Path):
 
 
 # shutil.rmtree follows symlinks and doesn't handle read-only files or permission errors cleanly
-def safe_rmtree(path: str):
+def safe_rmtree(path):
+    # type: (str) -> None
     path = Path(path)
     if not path.exists():
         return
@@ -98,12 +109,13 @@ def safe_rmtree(path: str):
 
 
 def clone_and_archive_repo(
-    repo_url: str,
-    local_repo_dir: str,
-    archive_format: str,
-    include_history: bool,
-    is_gist: bool = False,
+    repo_url,
+    local_repo_dir,
+    archive_format,
+    include_history,
+    is_gist=False,
 ):
+    # type: (str, str, str, bool, bool) -> None
     safe_rmtree(local_repo_dir)
     logger.info(f"cloning repo: {repo_url} to {local_repo_dir}")
     start = default_timer()
@@ -134,15 +146,16 @@ def clone_and_archive_repo(
 
 
 def get_user(username, prompt_token):
+    # type: (str, bool) -> tuple[NamedUser | AuthenticatedUser, PaginatedList[Repository], PaginatedList[Gist], str | None]
     if prompt_token:
-        token = getpass.getpass('Token:')
+        token = getpass.getpass("Token:")
         if not token:
-            print(f'Error: auth token cannot be empty')
+            print(f"Error: auth token cannot be empty")
             exit(1)
         auth = github.Auth.Token(token)
         gh = github.Github(auth=auth)
     else:
-        token = os.getenv('GITHUB_TOKEN')
+        token = os.getenv("GITHUB_TOKEN")
         if token is not None:
             auth = github.Auth.Token(token)
             gh = github.Github(auth=auth)
@@ -152,7 +165,7 @@ def get_user(username, prompt_token):
         try:
             user = gh.get_user(username)
         except github.GithubException as e:
-            if e.data['status'] == '404':
+            if e.data["status"] == "404":
                 print(f'Error: user "{username}" not found on GitHub')
             else:
                 raise e
@@ -162,12 +175,12 @@ def get_user(username, prompt_token):
         # you need to be authenticated and then call the API
         # with no username to get private repos
         user = gh.get_user()
-        repos = user.get_repos(affiliation='owner')
+        repos = user.get_repos(affiliation="owner")
         try:
             # this just makes an API request so we can exit if unauthorized
-            repos.totalCount
+            _ = repos.totalCount
         except github.GithubException as e:
-            if e.data['status'] == '401':
+            if e.data["status"] == "401":
                 print(f'Error: invalid auth token for user "{username}" on GitHub')
             else:
                 raise e
@@ -175,15 +188,17 @@ def get_user(username, prompt_token):
     gists = user.get_gists()
     return user, repos, gists, token
 
+
 def run(
-    username,       # type: str
-    base_dir,       # type: str
-    archive_format, # type: str
-    include_gists,  # type: bool
-    include_history,# type: bool
-    list_only       # type: bool
-    prompt_token    # type: str
+    username,
+    base_dir,
+    archive_format,
+    include_gists,
+    include_history,
+    list_only,
+    prompt_token,
 ):
+    # type: (str, str, str, bool, bool, bool, bool) -> None
     working_dir = os.path.join(base_dir, "backups")
     user, repos, gists, token = get_user(username, prompt_token)
     repos = user.get_repos()
@@ -197,12 +212,7 @@ def run(
         if list_only:
             logger.info(url)
         else:
-               clone_and_archive_repo(
-                url,
-                local_repo_dir,
-                archive_format,
-                include_history
-            )
+            clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
     if include_gists:
         gists = user.get_gists()
         num_gists = len([1 for _ in gists])
@@ -241,10 +251,7 @@ def main():
         "--list", default=False, action="store_true", help="list repos only"
     )
     parser.add_argument(
-        '--token',
-        default=False,
-        action='store_true',
-        help='prompt for auth token'
+        "--token", default=False, action="store_true", help="prompt for auth token"
     )
     args = parser.parse_args()
     run(
@@ -254,7 +261,7 @@ def main():
         include_gists=args.gists,
         include_history=args.history,
         list_only=args.list,
-        prompt_token=args.token
+        prompt_token=args.token,
     )
 
 
