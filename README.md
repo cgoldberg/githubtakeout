@@ -78,6 +78,13 @@ options:
 
 ## Usage Examples:
 
+### Install from PyPI with pipx, Run:
+
+```
+pipx install githubtakeout
+githubtakeout <github username>
+```
+
 ### Create/Activate Virtual Environment, Install from PyPI, Run:
 
 ```
