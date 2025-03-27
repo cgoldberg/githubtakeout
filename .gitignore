@@ -98,3 +98,6 @@ VENV/
 
 # Rope project settings
 .ropeproject
+
+# Jetbrains
+.idea/
