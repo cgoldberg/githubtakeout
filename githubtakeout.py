@@ -58,7 +58,7 @@ def archive(local_repo_dir, archive_format='zip', is_gist=False):
 
 def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
     def remove_readonly(func, path, _):
-        "Clear the readonly bit and reattempt the removal"
+        # clear the readonly bit and reattempt removal
         os.chmod(path, stat.S_IWRITE)
         func(path)
     try:
