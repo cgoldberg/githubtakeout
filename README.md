@@ -29,7 +29,7 @@ as tarballs (`.tar.gz`) using the `--format=tar` option.
 
 ## Requirements:
 
-- Python 3.9+
+- Python 3.12+
 - Git 1.7+
 - Python packages:
     - GitPython
