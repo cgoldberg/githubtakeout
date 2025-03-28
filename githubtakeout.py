@@ -5,6 +5,8 @@ import getpass
 import logging
 import os
 import shutil
+import stat
+import sys
 import tarfile
 import urllib
 import zipfile
@@ -43,20 +45,24 @@ def archive(local_repo_dir, archive_format='zip', is_gist=False):
     archive_path = os.path.join(parent_dir, archive_name)
     logger.info(f'creating archive: {archive_path}')
     if archive_format == 'tar':
-        with tarfile.open(archive_path, 'w:gz') as tar:
-            tar.add(local_repo_dir, arcname=base_name)
+        with tarfile.open(archive_path, 'w:gz') as tar_archive:
+            tar_archive.add(local_repo_dir, arcname=base_name)
     elif archive_format == 'zip':
-        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zip:
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zip_archive:
             repo_path = Path(local_repo_dir)
             for entry in repo_path.rglob('*'):
                 path = os.path.join(base_name, entry.relative_to(repo_path))
-                zip.write(entry, arcname=path)
+                zip_archive.write(entry, arcname=path)
     return archive_path
 
 
 def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
+    def remove_readonly(func, path, _):
+        "Clear the readonly bit and reattempt the removal"
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
     try:
-        shutil.rmtree(local_repo_dir)
+        shutil.rmtree(local_repo_dir, onexc=remove_readonly)
     except FileNotFoundError:
         pass
     repo_path = urllib.parse.urlparse(repo_url).path
@@ -69,14 +75,12 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
             # shallow clone (no commit history or branches)
             git.Repo.clone_from(repo_url, local_repo_dir, multi_options=['--depth=1'])
             try:
-                shutil.rmtree(os.path.join(local_repo_dir, '.git'))
+                shutil.rmtree(os.path.join(local_repo_dir, '.git'), onexc=remove_readonly)
             except FileNotFoundError:
                 pass
     except git.GitCommandError as e:
         logger.error(e)
         return
-    elapsed = default_timer() - start
-    logger.info(f'elapsed time: {elapsed:.3f} secs')
     archive_path = archive(local_repo_dir, archive_format, is_gist)
     size_kb = os.path.getsize(archive_path) / 1024
     logger.info(f'archive size: {size_kb:.2f} KB')
@@ -85,15 +89,16 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
         shutil.rmtree(local_repo_dir)
     except FileNotFoundError:
         pass
-    logger.info('')
+    elapsed = default_timer() - start
+    base_name = os.path.basename(local_repo_dir)
+    logger.info(f'successfully backed up "{base_name}" repo in {elapsed:.3f} secs\n')
 
 
 def get_user(username, prompt_token):
     if prompt_token:
         token = getpass.getpass('Token:')
         if not token:
-            print(f'Error: auth token cannot be empty')
-            exit(1)
+            sys.exit('Error: auth token cannot be empty')
         auth = github.Auth.Token(token)
         gh = github.Github(auth=auth)
     else:
@@ -108,10 +113,9 @@ def get_user(username, prompt_token):
             user = gh.get_user(username)
         except github.GithubException as e:
             if e.data['status'] == '404':
-                print(f'Error: user "{username}" not found on GitHub')
+                sys.exit(f'Error: user "{username}" not found on GitHub')
             else:
                 raise e
-            exit(1)
         repos = user.get_repos()
     else:
         # you need to be authenticated and then call the API
@@ -120,28 +124,27 @@ def get_user(username, prompt_token):
         repos = user.get_repos(affiliation='owner')
         try:
             # this just makes an API request so we can exit if unauthorized
-            repos.totalCount
+            _ = repos.totalCount
         except github.GithubException as e:
             if e.data['status'] == '401':
-                print(f'Error: invalid auth token for user "{username}" on GitHub')
+                sys.exit(f'Error: invalid auth token for user "{username}" on GitHub')
             else:
                 raise e
-            exit(1)
     gists = user.get_gists()
     return user, repos, gists, token
 
 
-def run(username, base_dir, archive_format, include_gists, include_history, list, prompt_token):
+def run(username, base_dir, archive_format, include_gists, include_history, list_only, prompt_token):
     working_dir = os.path.join(base_dir, 'backups')
     user, repos, gists, token = get_user(username, prompt_token)
     num_repos = repos.totalCount
-    if not list:
+    if not list_only:
         logger.info(f'creating archives in: {working_dir}\n')
     logger.info(f'found {num_repos} repos for user "{username}"\n')
     for repo in repos:
         local_repo_dir = os.path.join(working_dir, repo.name)
         url = add_creds(repo.clone_url, username, token)
-        if list:
+        if list_only:
             logger.info(url)
         else:
             clone_and_archive_repo(
@@ -157,7 +160,7 @@ def run(username, base_dir, archive_format, include_gists, include_history, list
         for gist in gists:
             local_repo_dir = os.path.join(working_dir, gist.id)
             url = add_creds(gist.git_pull_url, username, token)
-            if list:
+            if list_only:
                 logger.info(url)
             else:
                 clone_and_archive_repo(
@@ -170,6 +173,8 @@ def run(username, base_dir, archive_format, include_gists, include_history, list
 
 
 def main():
+    if sys.version_info < (3, 12):
+        sys.exit('Sorry, this program requires Python 3.12+')
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'username',
@@ -216,7 +221,7 @@ def main():
         archive_format=args.format,
         include_gists=args.gists,
         include_history=args.history,
-        list=args.list,
+        list_only=args.list,
         prompt_token=args.token
     )
 
