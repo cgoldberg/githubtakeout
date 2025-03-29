@@ -58,8 +58,8 @@ def archive(local_repo_dir, archive_format='zip', is_gist=False):
 
 def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
     def remove_readonly(func, path, _):
-        # clear the readonly bit and reattempt removal
-        os.chmod(path, stat.S_IWRITE)
+        # change permissions and reattempt removal
+        os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
         func(path)
     try:
         shutil.rmtree(local_repo_dir, onexc=remove_readonly)
