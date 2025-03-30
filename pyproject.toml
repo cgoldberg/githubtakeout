@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "githubtakeout"
-version = "0.1.3dev0"
+version = "0.1.3dev1"
 description = "Archive public Git Repos and Gists from GitHub"
 license = "MIT"
 license-files = ["LICENSE"]

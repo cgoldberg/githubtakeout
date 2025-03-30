@@ -56,37 +56,63 @@ def archive(local_repo_dir, archive_format='zip', is_gist=False):
     return archive_path
 
 
+def clone(repo_url, local_repo_dir, include_history):
+    try:
+        if include_history:
+            # full clone
+            repo = git.Repo.clone_from(repo_url, local_repo_dir)
+        else:
+            # shallow clone (no commit history or branches)
+            repo = git.Repo.clone_from(repo_url, local_repo_dir, multi_options=['--depth=1'])
+    except git.GitCommandError as e:
+        logger.error(e)
+        sys.exit('Error: failed cloning repo')
+    finally:
+        try:
+            # release resources
+            repo.close()
+        except UnboundLocalError:
+            # this occurs if we catch a signal while cloning
+            pass
+
+
+
 def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
     def remove_readonly(func, path, _):
-        # change permissions and reattempt removal
-        os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+        # This is necessary so rmtree() doesn't fail if there are any readonly
+        # dirs/files when trying to delete. This seems to happen after cloning on
+        # Windows. When any error occurs during deletion, we change the permissions
+        # and and reattempt removal.
+        #
+        # give read permissions
+        os.chmod(path, stat.S_IREAD)
+        # give write permissions
+        os.chmod(path, stat.S_IWRITE)
+        # try again
         func(path)
     try:
+        # delete repo if it already exists
         shutil.rmtree(local_repo_dir, onexc=remove_readonly)
     except FileNotFoundError:
         pass
-    repo_path = urllib.parse.urlparse(repo_url).path
-    logger.info(f'cloning repo: {repo_path} to {local_repo_dir}')
+    repo_name = urllib.parse.urlparse(repo_url).path.lstrip('/')
+    logger.info(f'cloning repo: {repo_name} to {local_repo_dir}')
     start = default_timer()
-    try:
-        if include_history:
-            git.Repo.clone_from(repo_url, local_repo_dir)
-        else:
-            # shallow clone (no commit history or branches)
-            git.Repo.clone_from(repo_url, local_repo_dir, multi_options=['--depth=1'])
-            try:
-                shutil.rmtree(os.path.join(local_repo_dir, '.git'), onexc=remove_readonly)
-            except FileNotFoundError:
-                pass
-    except git.GitCommandError as e:
-        logger.error(e)
-        return
+    clone(repo_url, local_repo_dir, include_history)
+    if not include_history:
+        # delete the .git directory if we are not saving history
+        try:
+            git_dir = os.path.join(local_repo_dir, '.git')
+            shutil.rmtree(git_dir, onexc=remove_readonly)
+        except FileNotFoundError:
+            pass
     archive_path = archive(local_repo_dir, archive_format, is_gist)
     size_kb = os.path.getsize(archive_path) / 1024
     logger.info(f'archive size: {size_kb:.2f} KB')
     logger.info('deleting repo')
     try:
-        shutil.rmtree(local_repo_dir)
+        # delete repo after archive is created
+        shutil.rmtree(local_repo_dir, onexc=remove_readonly)
     except FileNotFoundError:
         pass
     elapsed = default_timer() - start
@@ -215,15 +241,18 @@ def main():
         help='prompt for auth token'
     )
     args = parser.parse_args()
-    run(
-        username=args.username,
-        base_dir=args.dir,
-        archive_format=args.format,
-        include_gists=args.gists,
-        include_history=args.history,
-        list_only=args.list,
-        prompt_token=args.token
-    )
+    try:
+        run(
+            username=args.username,
+            base_dir=args.dir,
+            archive_format=args.format,
+            include_gists=args.gists,
+            include_history=args.history,
+            list_only=args.list,
+            prompt_token=args.token
+        )
+    except KeyboardInterrupt:
+        sys.exit('\nexiting program ...')
 
 
 if __name__ == '__main__':
