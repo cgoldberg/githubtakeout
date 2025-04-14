@@ -200,11 +200,11 @@ def run(username, base_dir, archive_format, include_gists, include_history, list
 
 def main():
     if sys.version_info < (3, 12):
-        sys.exit('Sorry, this program requires Python 3.12+')
+        sys.exit('sorry, this program requires Python 3.12+')
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'username',
-        help='GitHub username'
+        help='github username'
     )
     parser.add_argument(
         '--dir',
@@ -218,26 +218,26 @@ def main():
     )
     parser.add_argument(
         '--gists',
-        default=False,
         action='store_true',
+        default=False,
         help='include gists'
     )
     parser.add_argument(
         '--history',
-        default=False,
         action='store_true',
+        default=False,
         help='include commit history and branches (.git directory)'
     )
     parser.add_argument(
         '--list',
-        default=False,
         action='store_true',
+        default=False,
         help='list repos only'
     )
     parser.add_argument(
         '--token',
-        default=False,
         action='store_true',
+        default=False,
         help='prompt for auth token'
     )
     args = parser.parse_args()
