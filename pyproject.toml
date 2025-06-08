@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "githubtakeout"
-version = "0.1.6dev0"
+version = "0.1.6"
 description = "Archive public Git Repos and Gists from GitHub"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -35,8 +35,8 @@ homepage = "https://github.com/cgoldberg/githubtakeout"
 source = "https://github.com/cgoldberg/githubtakeout"
 download = "https://pypi.org/project/githubtakeout"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.black]
 line-length = 88
