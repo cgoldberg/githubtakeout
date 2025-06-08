@@ -6,6 +6,7 @@
 import argparse
 import getpass
 import logging
+import math
 import os
 import shutil
 import stat
@@ -23,6 +24,16 @@ from progress import GitProgress
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0 B"
+    size_name = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return f"{s} {size_name[i]}"
 
 
 def add_creds(url, username, token):
@@ -116,8 +127,8 @@ def clone_and_archive_repo(
         except FileNotFoundError:
             pass
     archive_path = archive(local_repo_dir, archive_format, is_gist)
-    size_kb = os.path.getsize(archive_path) / 1024
-    logger.info(f"archive size: {size_kb:.2f} KB")
+    size = convert_size(os.path.getsize(archive_path))
+    logger.info(f"archive size: {size}")
     logger.info("deleting repo")
     try:
         # delete repo after archive is created
