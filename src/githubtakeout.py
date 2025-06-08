@@ -21,7 +21,6 @@ import github
 
 from progress import GitProgress
 
-
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
