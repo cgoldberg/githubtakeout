@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
 # Corey Goldberg, 2025
 # License: MIT
 
 """Archive Git Repos and Gists from GitHub"""
-
 
 import argparse
 import getpass
@@ -20,6 +18,8 @@ from timeit import default_timer
 
 import git
 import github
+
+from progress import GitProgress
 
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -64,15 +64,17 @@ def clone(repo_url, local_repo_dir, include_history):
     try:
         if include_history:
             # full clone
-            repo = git.Repo.clone_from(repo_url, local_repo_dir)
+            repo = git.Repo.clone_from(
+                url=repo_url, to_path=local_repo_dir, progress=GitProgress()
+            )
         else:
             # shallow clone (no commit history or branches)
             repo = git.Repo.clone_from(
-                repo_url, local_repo_dir, multi_options=["--depth=1"]
+                url=repo_url, to_path=local_repo_dir, depth=1, progress=GitProgress()
             )
     except git.GitCommandError as e:
         logger.error(e)
-        sys.exit("Error: failed cloning repo")
+        sys.exit("error: failed cloning repo")
     finally:
         try:
             # release resources
@@ -125,14 +127,14 @@ def clone_and_archive_repo(
         pass
     elapsed = default_timer() - start
     base_name = os.path.basename(local_repo_dir)
-    logger.info(f'successfully backed up "{base_name}" repo in {elapsed:.3f} secs\n')
+    logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
 
 
 def get_user(username, prompt_token):
     if prompt_token:
         token = getpass.getpass("Token:")
         if not token:
-            sys.exit("Error: auth token cannot be empty")
+            sys.exit("error: auth token cannot be empty")
         auth = github.Auth.Token(token)
         gh = github.Github(auth=auth)
     else:
@@ -147,7 +149,7 @@ def get_user(username, prompt_token):
             user = gh.get_user(username)
         except github.GithubException as e:
             if e.data["status"] == "404":
-                sys.exit(f'Error: user "{username}" not found on GitHub')
+                sys.exit(f"error: user '{username}' not found")
             else:
                 raise e
         repos = user.get_repos()
@@ -161,7 +163,7 @@ def get_user(username, prompt_token):
             _ = repos.totalCount
         except github.GithubException as e:
             if e.data["status"] == "401":
-                sys.exit(f'Error: invalid auth token for user "{username}" on GitHub')
+                sys.exit(f"error: invalid auth token for user '{username}'")
             else:
                 raise e
     gists = user.get_gists()
@@ -182,7 +184,7 @@ def run(
     num_repos = repos.totalCount
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
-    logger.info(f'found {num_repos} repos for user "{username}"\n')
+    logger.info(f"found {num_repos} repos for user '{username}'\n")
     for repo in repos:
         local_repo_dir = os.path.join(working_dir, repo.name)
         url = add_creds(repo.clone_url, username, token)
@@ -193,7 +195,7 @@ def run(
     if include_gists:
         num_gists = gists.totalCount
         logger.info("")
-        logger.info(f'found {num_gists} gists for user "{username}"\n')
+        logger.info(f"found {num_gists} gists for user '{username}'\n")
         for gist in gists:
             local_repo_dir = os.path.join(working_dir, gist.id)
             url = add_creds(gist.git_pull_url, username, token)
@@ -240,7 +242,3 @@ def main():
         )
     except KeyboardInterrupt:
         sys.exit("\nexiting program ...")
-
-
-if __name__ == "__main__":
-    main()

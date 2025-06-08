@@ -11,7 +11,7 @@ license-files = ["LICENSE"]
 authors = [{name = "Corey Goldberg"}]
 maintainers = [{name = "Corey Goldberg"}]
 readme = "README.md"
-requires-python = ">= 3.12"
+requires-python = ">=3.12"
 keywords = ["git", "github", "archive", "backup", "export", "takeout"]
 classifiers = [
     "Environment :: Console",
@@ -19,11 +19,12 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13"
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "GitPython==3.1.44",
-    "PyGithub==2.6.1"
+    "PyGithub==2.6.1",
+    "rich==14.0.0",
 ]
 
 [project.scripts]
@@ -33,3 +34,6 @@ githubtakeout = "githubtakeout:main"
 homepage = "https://github.com/cgoldberg/githubtakeout"
 source = "https://github.com/cgoldberg/githubtakeout"
 download = "https://pypi.org/project/githubtakeout"
+
+[tool.setuptools.packages.find]
+where = ["src"]
