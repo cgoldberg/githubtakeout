@@ -4,10 +4,10 @@
 
 ---
 
-- Copyright (c) 2015-2025 [Corey Goldberg](https://github.com/cgoldberg)
-- License: [MIT](https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/LICENSE)
-- Development: [GitHub](https://github.com/cgoldberg/githubtakeout)
-- Download/Install: [PyPI](https://pypi.org/project/githubtakeout)
+- Copyright (c) 2015-2025 [Corey Goldberg][github-home]
+- Development: [GitHub][github-repo]
+- Download/Install: [PyPI][pypi-githubtakeout]
+- License: [MIT][mit-license]
 
 ----
 
@@ -32,12 +32,13 @@ as tarballs (`.tar.gz`) using the `--format=tar` option.
 - Python 3.12+
 - Git 1.7+
 - Python packages:
-    - GitPython
-    - PyGithub
+    - [GitPython][pypi-gitpython]
+    - [PyGithub][pypi-pygithub]
+    - [rich][pypi-rich]
 
 ## Installation:
 
-Install from [PyPI](https://pypi.org/project/githubtakeout):
+Install from [PyPI][pypyi-githubtakeout]:
 
 ```
 pip install githubtakeout
@@ -45,14 +46,14 @@ pip install githubtakeout
 
 ## Authentication:
 
-By default, `githubtakeout` will only retrieve an account's public repos. To access
-private repos and secret gists, you need to authenticate.
+By default, `githubtakeout` will only retrieve an account's public repos. To access private repos and secret gists,
+you need to authenticate.
 
-First, you must create a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
-  on Github (either a fine-grained or classic personal access token). Once you have a token, you can set the `GITHUB_TOKEN` environment variable:
+First, you must create a [personal access token][github-pat] on Github (either a fine-grained or classic personal
+access token). Once you have a token, you can set the `GITHUB_TOKEN` environment variable:
 
 ```
-$ export GITHUB_TOKEN=<auth token created on GitHub>
+$ export GITHUB_TOKEN=<access token>
 ```
 
 If you prefer to be prompted for your token each time you run the program, use the `--token` argument.
@@ -75,22 +76,12 @@ options:
   --token          prompt for auth toke
 ```
 
-
 ## Usage Examples:
 
 ### Install from PyPI with pipx, Run:
 
 ```
 pipx install githubtakeout
-githubtakeout <github username>
-```
-
-### Create/Activate Virtual Environment, Install from PyPI, Run:
-
-```
-python3 -m venv venv
-source venv/bin/activate
-pip install githubtakeout
 githubtakeout <github username>
 ```
 
@@ -104,3 +95,13 @@ source venv/bin/activate
 pip install .
 githubtakeout <github username>
 ```
+
+
+[github-home]: https://github.com/cgoldberg
+[github-repo]: https://github.com/cgoldberg/sudokubot
+[github-pat]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+[pypi-githubtakeout]: https://pypi.org/project/githubtakeout
+[pypi-gitpython]: https://pypi.org/project/GitPython
+[pypi-pygithub]: https://pypi.org/project/PyGithub
+[pypi-rich]: https://pypi.org/project/rich
+[mit-license]: https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/LICENSE
