@@ -22,6 +22,8 @@ import github
 
 from progress import GitProgress
 
+ARCHIVE_FORMATS = ("tar", "zip")
+
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ def add_creds(url, username, token):
 
 
 def archive(local_repo_dir, archive_format="zip", is_gist=False):
-    if archive_format not in ("tar", "zip"):
+    if archive_format not in ARCHIVE_FORMATS:
         raise ValueError(f"{archive_format} is not a valid archive format")
     base_name = os.path.basename(local_repo_dir)
     extension = "tar.gz" if archive_format == "tar" else archive_format
@@ -222,8 +224,17 @@ def main():
         sys.exit("sorry, this program requires Python 3.12+")
     parser = argparse.ArgumentParser()
     parser.add_argument("username", help="github username")
-    parser.add_argument("--dir", default=os.getcwd(), help="output directory")
-    parser.add_argument("--format", default="zip", help="archive format (tar, zip)")
+    parser.add_argument(
+        "--dir",
+        default=os.getcwd(),
+        help="output directory (default: ./)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=ARCHIVE_FORMATS,
+        default="zip",
+        help="archive format (default: %(default)s)",
+    )
     parser.add_argument(
         "--gists", action="store_true", default=False, help="include gists"
     )

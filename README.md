@@ -61,19 +61,19 @@ If you prefer to be prompted for your token each time you run the program, use t
 ### CLI Options:
 
 ```
-usage: githubtakeout [-h] [--dir DIR] [--format FORMAT] [--gists] [--history] [--list] [--token] username
+usage: githubtakeout [-h] [--dir DIR] [--format {tar,zip}] [--gists] [--history] [--list] [--token] username
 
 positional arguments:
-  username         GitHub username
+  username            github username
 
 options:
-  -h, --help       show this help message and exit
-  --dir DIR        output directory
-  --format FORMAT  archive format (tar, zip)
-  --gists          include gists
-  --history        include commit history and branches (.git directory)
-  --list           list repos only
-  --token          prompt for auth toke
+  -h, --help          show this help message and exit
+  --dir DIR           output directory (default: ./)
+  --format {tar,zip}  archive format (default: zip)
+  --gists             include gists
+  --history           include commit history and branches (.git directory)
+  --list              list repos only
+  --token             prompt for auth token
 ```
 
 ## Usage Examples:
