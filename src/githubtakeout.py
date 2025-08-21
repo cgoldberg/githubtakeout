@@ -77,12 +77,17 @@ def clone(repo_url, local_repo_dir, include_history):
         if include_history:
             # full clone
             repo = git.Repo.clone_from(
-                url=repo_url, to_path=local_repo_dir, progress=GitProgress()
+                url=repo_url,
+                to_path=local_repo_dir,
+                progress=GitProgress(),
             )
         else:
             # shallow clone (no commit history or branches)
             repo = git.Repo.clone_from(
-                url=repo_url, to_path=local_repo_dir, depth=1, progress=GitProgress()
+                url=repo_url,
+                to_path=local_repo_dir,
+                multi_options=["--depth=1"],
+                progress=GitProgress(),
             )
     except git.GitCommandError as e:
         logger.error(e)
