@@ -22,9 +22,9 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "GitPython==3.1.44",
-    "PyGithub==2.6.1",
-    "rich==14.0.0",
+    "GitPython==3.1.45",
+    "PyGithub==2.7.0",
+    "rich==14.1.0",
 ]
 
 [project.scripts]
