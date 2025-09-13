@@ -19,6 +19,7 @@ from timeit import default_timer
 
 import git
 import github
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from progress import GitProgress
 
@@ -47,58 +48,6 @@ def add_creds(url, username, token):
         netloc = f"{username}:{token}@{url_parts.netloc}"
         new_url = urllib.parse.urlunparse(url_parts._replace(netloc=netloc))
     return new_url
-
-
-def archive(local_repo_dir, archive_format="zip", is_gist=False):
-    if archive_format not in ARCHIVE_FORMATS:
-        raise ValueError(f"{archive_format} is not a valid archive format")
-    base_name = os.path.basename(local_repo_dir)
-    extension = "tar.gz" if archive_format == "tar" else archive_format
-    archive_name = f"{base_name}.{extension}"
-    if is_gist:
-        archive_name = f"gist-{archive_name}"
-    parent_dir = os.path.dirname(local_repo_dir)
-    archive_path = os.path.join(parent_dir, archive_name)
-    logger.info(f"creating archive: {archive_path}")
-    if archive_format == "tar":
-        with tarfile.open(archive_path, "w:gz") as tar_archive:
-            tar_archive.add(local_repo_dir, arcname=base_name)
-    elif archive_format == "zip":
-        with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zip_archive:
-            repo_path = Path(local_repo_dir)
-            for entry in repo_path.rglob("*"):
-                path = os.path.join(base_name, entry.relative_to(repo_path))
-                zip_archive.write(entry, arcname=path)
-    return archive_path
-
-
-def clone(repo_url, local_repo_dir, include_history):
-    try:
-        if include_history:
-            # full clone
-            repo = git.Repo.clone_from(
-                url=repo_url,
-                to_path=local_repo_dir,
-                progress=GitProgress(),
-            )
-        else:
-            # shallow clone (no commit history or branches)
-            repo = git.Repo.clone_from(
-                url=repo_url,
-                to_path=local_repo_dir,
-                multi_options=["--depth=1"],
-                progress=GitProgress(),
-            )
-    except git.GitCommandError as e:
-        logger.error(e)
-        sys.exit("error: failed cloning repo")
-    finally:
-        try:
-            # release resources
-            repo.close()
-        except UnboundLocalError:
-            # this occurs if we catch a signal while cloning
-            pass
 
 
 def clone_and_archive_repo(
@@ -147,6 +96,65 @@ def clone_and_archive_repo(
     logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
 
 
+def archive(local_repo_dir, archive_format="zip", is_gist=False):
+    if archive_format not in ARCHIVE_FORMATS:
+        raise ValueError(f"{archive_format} is not a valid archive format")
+    base_name = os.path.basename(local_repo_dir)
+    extension = "tar.gz" if archive_format == "tar" else archive_format
+    archive_name = f"{base_name}.{extension}"
+    if is_gist:
+        archive_name = f"gist-{archive_name}"
+    parent_dir = os.path.dirname(local_repo_dir)
+    archive_path = os.path.join(parent_dir, archive_name)
+    logger.info(f"creating archive: {archive_path}")
+    if archive_format == "tar":
+        with tarfile.open(archive_path, "w:gz") as tar_archive:
+            tar_archive.add(local_repo_dir, arcname=base_name)
+    elif archive_format == "zip":
+        with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zip_archive:
+            repo_path = Path(local_repo_dir)
+            for entry in repo_path.rglob("*"):
+                path = os.path.join(base_name, entry.relative_to(repo_path))
+                zip_archive.write(entry, arcname=path)
+    return archive_path
+
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
+def clone(repo_url, local_repo_dir, include_history):
+    try:
+        if include_history:
+            # full clone
+            repo = git.Repo.clone_from(
+                url=repo_url,
+                to_path=local_repo_dir,
+                progress=GitProgress(),
+            )
+        else:
+            # shallow clone (no commit history or branches)
+            repo = git.Repo.clone_from(
+                url=repo_url,
+                to_path=local_repo_dir,
+                multi_options=["--depth=1"],
+                progress=GitProgress(),
+            )
+    except git.GitCommandError as e:
+        logger.error(e)
+        sys.exit("error: failed cloning repo")
+    finally:
+        try:
+            # release resources
+            repo.close()
+        except UnboundLocalError:
+            # this occurs if we catch a signal while cloning
+            pass
+
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
+def count_repos(repos):
+    return repos.totalCount
+
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
 def get_user(username, prompt_token):
     if prompt_token:
         token = getpass.getpass("Token:")
@@ -177,7 +185,7 @@ def get_user(username, prompt_token):
         repos = user.get_repos(affiliation="owner")
         try:
             # this just makes an API request so we can exit if unauthorized
-            _ = repos.totalCount
+            _ = count_repos(repos)
         except github.GithubException as e:
             if e.data["status"] == "401":
                 sys.exit(f"error: invalid auth token for user '{username}'")
@@ -198,7 +206,7 @@ def run(
 ):
     working_dir = os.path.join(base_dir, "backups")
     user, repos, gists, token = get_user(username, prompt_token)
-    num_repos = repos.totalCount
+    num_repos = count_repos(repos)
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
     logger.info(f"found {num_repos} repos for user '{username}'\n")
@@ -210,7 +218,7 @@ def run(
         else:
             clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
     if include_gists:
-        num_gists = gists.totalCount
+        num_gists = count_repos(gists)
         logger.info("")
         logger.info(f"found {num_gists} gists for user '{username}'\n")
         for gist in gists:
