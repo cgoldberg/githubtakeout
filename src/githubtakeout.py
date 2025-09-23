@@ -32,7 +32,7 @@ def convert_size(size_bytes):
     if size_bytes == 0:
         return "0 B"
     size_name = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
+    i = math.floor(math.log(size_bytes, 1024))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return f"{s} {size_name[i]}"
@@ -147,7 +147,7 @@ def clone_and_archive_repo(
     logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
 
 
-def get_user(username, prompt_token):
+def get_repos(username, prompt_token):
     if prompt_token:
         token = getpass.getpass("Token:")
         if not token:
@@ -184,7 +184,7 @@ def get_user(username, prompt_token):
             else:
                 raise e
     gists = user.get_gists()
-    return user, repos, gists, token
+    return repos, gists, token
 
 
 def run(
@@ -197,7 +197,7 @@ def run(
     prompt_token,
 ):
     working_dir = os.path.join(base_dir, "backups")
-    user, repos, gists, token = get_user(username, prompt_token)
+    repos, gists, token = get_repos(username, prompt_token)
     num_repos = repos.totalCount
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")

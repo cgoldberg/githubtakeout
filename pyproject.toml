@@ -48,8 +48,8 @@ respect-gitignore = true
 target-version = "py312"
 
 [tool.ruff.lint]
-extend-select = [
-    "D", "E", "F", "I", "RUF022", "TID252"
+select = [
+    "D", "E", "F", "I", "PT", "RUF", "TID", "W"
 ]
 extend-ignore = [
     "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203",

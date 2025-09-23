@@ -5,7 +5,7 @@ from rich import console, progress
 
 
 class GitProgress(git.RemoteProgress):
-    OP_CODES = [
+    OP_CODES = [  # noqa
         "BEGIN",
         "CHECKING_OUT",
         "COMPRESSING",
@@ -16,7 +16,7 @@ class GitProgress(git.RemoteProgress):
         "RESOLVING",
         "WRITING",
     ]
-    OP_CODE_MAP = {
+    OP_CODE_MAP = {  # noqa
         getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES
     }
 
