@@ -1,7 +1,7 @@
 # Corey Goldberg, 2025
 # License: MIT
 
-"""Archive Git Repos and Gists from GitHub"""
+"""Archive Git Repos and Gists from GitHub."""
 
 import argparse
 import getpass
