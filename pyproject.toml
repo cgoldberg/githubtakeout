@@ -35,6 +35,19 @@ homepage = "https://github.com/cgoldberg/githubtakeout"
 source = "https://github.com/cgoldberg/githubtakeout"
 download = "https://pypi.org/project/githubtakeout"
 
+[dependency-groups]
+dev = [
+    "tox",
+]
+lint = [
+    "black",
+    "ruff",
+]
+validate = [
+    "packaging",
+    "validate-pyproject",
+]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
