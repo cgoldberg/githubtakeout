@@ -58,7 +58,7 @@ $ export GITHUB_TOKEN=<access token>
 
 If you prefer to be prompted for your token each time you run the program, use the `--token` argument.
 
-### CLI Options:
+## CLI Options:
 
 ```
 usage: githubtakeout [-h] [--dir DIR] [--format {tar,zip}] [--gists] [--history] [--list] [--token] username
