@@ -147,32 +147,12 @@ def clone_and_archive_repo(
     logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
 
 
-def get_repos(username, prompt_token):
-    if prompt_token:
-        token = getpass.getpass("Token:")
-        if not token:
-            sys.exit("error: auth token cannot be empty")
+def get_repos(username, token, include_gists):
+    if token is not None:
+        # you need to be authenticated and then call the API
+        # with no username to get public and private repos
         auth = github.Auth.Token(token)
         gh = github.Github(auth=auth)
-    else:
-        token = os.getenv("GITHUB_TOKEN")
-        if token is not None:
-            auth = github.Auth.Token(token)
-            gh = github.Github(auth=auth)
-        else:
-            gh = github.Github()
-    if token is None:
-        try:
-            user = gh.get_user(username)
-        except github.GithubException as e:
-            if e.data["status"] == "404":
-                sys.exit(f"error: user '{username}' not found")
-            else:
-                raise e
-        repos = user.get_repos()
-    else:
-        # you need to be authenticated and then call the API
-        # with no username to get private repos
         user = gh.get_user()
         repos = user.get_repos(affiliation="owner")
         try:
@@ -183,8 +163,31 @@ def get_repos(username, prompt_token):
                 sys.exit(f"error: invalid auth token for user '{username}'")
             else:
                 raise e
-    gists = user.get_gists()
-    return repos, gists, token
+    else:
+        gh = github.Github()
+        try:
+            user = gh.get_user(username)
+        except github.GithubException as e:
+            if e.data["status"] == "404":
+                sys.exit(f"error: user '{username}' not found")
+            else:
+                raise e
+        repos = user.get_repos()
+    if include_gists:
+        gists = user.get_gists()
+    else:
+        gists = None
+    return repos, gists
+
+
+def get_token(prompt_for_token):
+    if prompt_for_token:
+        token = getpass.getpass("Token:")
+        if not token:
+            sys.exit("error: auth token cannot be empty")
+    else:
+        token = os.getenv("GITHUB_TOKEN")
+    return token
 
 
 def run(
@@ -194,10 +197,11 @@ def run(
     include_gists,
     include_history,
     list_only,
-    prompt_token,
+    prompt_for_token,
 ):
     working_dir = os.path.join(base_dir, "backups")
-    repos, gists, token = get_repos(username, prompt_token)
+    token = get_token(prompt_for_token)
+    repos, gists = get_repos(username, token, include_gists)
     num_repos = repos.totalCount
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
@@ -209,7 +213,7 @@ def run(
             logger.info(url)
         else:
             clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
-    if include_gists:
+    if gists is not None:
         num_gists = gists.totalCount
         logger.info("")
         logger.info(f"found {num_gists} gists for user '{username}'\n")
@@ -264,7 +268,7 @@ def main():
             include_gists=args.gists,
             include_history=args.history,
             list_only=args.list,
-            prompt_token=args.token,
+            prompt_for_token=args.token,
         )
     except KeyboardInterrupt:
         sys.exit("\nexiting program ...")
