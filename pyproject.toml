@@ -39,11 +39,11 @@ download = "https://pypi.org/project/githubtakeout"
 package-dir = {"" = "src"}
 
 [tool.black]
-line-length = 88
+line-length = 120
 target-version = ["py39", "py310", "py311", "py312", "py313"]
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 respect-gitignore = true
 target-version = "py312"
 
@@ -53,10 +53,10 @@ select = [
 ]
 extend-ignore = [
     "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203",
-    "D205", "D211", "D213", "D400", "D401"
+    "D205", "D211", "D213", "D400", "D401", "RUF012"
 ]
 fixable = ["ALL"]
 
 [tool.ruff.format]
 docstring-code-format = true
-docstring-code-line-length = 88
+docstring-code-line-length = 120

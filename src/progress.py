@@ -1,11 +1,15 @@
+# Copyright (c) 2025 Corey Goldberg
+# License: MIT
+# adapted from: https://stackoverflow.com/a/71285627/16148
+
+"""Progress bar for cloning Git repos."""
+
 import git
 from rich import console, progress
 
-# adapted from: https://stackoverflow.com/a/71285627/16148
-
 
 class GitProgress(git.RemoteProgress):
-    OP_CODES = [  # noqa
+    OP_CODES = [
         "BEGIN",
         "CHECKING_OUT",
         "COMPRESSING",
@@ -16,9 +20,7 @@ class GitProgress(git.RemoteProgress):
         "RESOLVING",
         "WRITING",
     ]
-    OP_CODE_MAP = {  # noqa
-        getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES
-    }
+    OP_CODE_MAP = {getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES}
 
     def __init__(self):
         super().__init__()

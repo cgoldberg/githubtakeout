@@ -1,4 +1,4 @@
-# Corey Goldberg, 2025
+# Copyright (c) 2015-2025 Corey Goldberg
 # License: MIT
 
 """Archive Git Repos and Gists from GitHub."""
@@ -101,9 +101,7 @@ def clone(repo_url, local_repo_dir, include_history):
             pass
 
 
-def clone_and_archive_repo(
-    repo_url, local_repo_dir, archive_format, include_history, is_gist=False
-):
+def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
     def remove_readonly(func, path, _):
         # This is necessary so rmtree() doesn't fail if there are any readonly
         # dirs/files when trying to delete. This seems to happen after cloning on
@@ -223,9 +221,7 @@ def run(
             if list_only:
                 logger.info(url)
             else:
-                clone_and_archive_repo(
-                    url, local_repo_dir, archive_format, include_history, is_gist=True
-                )
+                clone_and_archive_repo(url, local_repo_dir, archive_format, include_history, is_gist=True)
 
 
 def main():
@@ -244,21 +240,15 @@ def main():
         default="zip",
         help="archive format (default: %(default)s)",
     )
-    parser.add_argument(
-        "--gists", action="store_true", default=False, help="include gists"
-    )
+    parser.add_argument("--gists", action="store_true", default=False, help="include gists")
     parser.add_argument(
         "--history",
         action="store_true",
         default=False,
         help="include commit history and branches (.git directory)",
     )
-    parser.add_argument(
-        "--list", action="store_true", default=False, help="list repos only"
-    )
-    parser.add_argument(
-        "--token", action="store_true", default=False, help="prompt for auth token"
-    )
+    parser.add_argument("--list", action="store_true", default=False, help="list repos only")
+    parser.add_argument("--token", action="store_true", default=False, help="prompt for auth token")
     args = parser.parse_args()
     try:
         run(
