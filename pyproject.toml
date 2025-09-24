@@ -53,7 +53,9 @@ package-dir = {"" = "src"}
 
 [tool.black]
 line-length = 120
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = [
+    "py39", "py310", "py311", "py312", "py313"
+]
 
 [tool.ruff]
 line-length = 120
