@@ -78,14 +78,14 @@ options:
 
 ## Usage Examples:
 
-### Install from PyPI with pipx, Run:
+#### Install from PyPI with pipx, Run:
 
 ```
 pipx install githubtakeout
 githubtakeout <github username>
 ```
 
-### Clone Repo, Create/Activate Virtual Environment, Install from Source, Run:
+#### Clone Repo, Create/Activate Virtual Environment, Install from Source, Run:
 
 ```
 git clone git@github.com:cgoldberg/githubtakeout.git
