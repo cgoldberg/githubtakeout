@@ -96,6 +96,7 @@ pip install .
 githubtakeout <github username>
 ```
 
+
 [github-home]: https://github.com/cgoldberg
 [github-repo]: https://github.com/cgoldberg/sudokubot
 [github-pat]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
