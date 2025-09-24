@@ -31,10 +31,6 @@ as tarballs (`.tar.gz`) using the `--format=tar` option.
 
 - Python 3.12+
 - Git 1.7+
-- Python packages:
-    - [GitPython][pypi-gitpython]
-    - [PyGithub][pypi-pygithub]
-    - [rich][pypi-rich]
 
 ## Installation:
 
@@ -100,7 +96,4 @@ githubtakeout <github username>
 [github-repo]: https://github.com/cgoldberg/sudokubot
 [github-pat]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
 [pypi-githubtakeout]: https://pypi.org/project/githubtakeout
-[pypi-gitpython]: https://pypi.org/project/GitPython
-[pypi-pygithub]: https://pypi.org/project/PyGithub
-[pypi-rich]: https://pypi.org/project/rich
 [mit-license]: https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/LICENSE
