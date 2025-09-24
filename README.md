@@ -38,7 +38,7 @@ as tarballs (`.tar.gz`) using the `--format=tar` option.
 
 ## Installation:
 
-Install from [PyPI][pypi-githubtakeout]:
+#### Install from [PyPI][pypi-githubtakeout]:
 
 ```
 pip install githubtakeout
