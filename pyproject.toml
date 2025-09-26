@@ -81,5 +81,5 @@ docstring-code-line-length = 120
 python_version = "3.9"
 enable_all = true
 disable = [
-    "FURB107", "FURB173", "FURB183", "FURB184"
+    "FURB104", "FURB107", "FURB147", "FURB173", "FURB183", "FURB184"
 ]
