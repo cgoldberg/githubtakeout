@@ -1,7 +1,7 @@
 # Copyright (c) 2015-2025 Corey Goldberg
 # License: MIT
 
-"""Archive Git Repos and Gists from GitHub."""
+"""Backup and archive Git Repos and Gists from GitHub."""
 
 import argparse
 import getpass
@@ -22,7 +22,7 @@ import github
 
 from progress import GitProgress
 
-ARCHIVE_FORMATS = ("tar", "zip")
+ARCHIVE_FORMATS = ("tar", "zip", "none")
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -52,6 +52,8 @@ def add_creds(url, username, token):
 def archive(local_repo_dir, archive_format="zip", is_gist=False):
     if archive_format not in ARCHIVE_FORMATS:
         raise ValueError(f"{archive_format} is not a valid archive format")
+    if archive_format == "none":
+        return None
     base_name = os.path.basename(local_repo_dir)
     extension = "tar.gz" if archive_format == "tar" else archive_format
     archive_name = f"{base_name}.{extension}"
@@ -132,14 +134,15 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
         except FileNotFoundError:
             pass
     archive_path = archive(local_repo_dir, archive_format, is_gist)
-    size = convert_size(os.path.getsize(archive_path))
-    logger.info(f"archive size: {size}")
-    logger.info("deleting repo")
-    try:
-        # delete repo after archive is created
-        shutil.rmtree(local_repo_dir, onexc=remove_readonly)
-    except FileNotFoundError:
-        pass
+    if archive_path:
+        size = convert_size(os.path.getsize(archive_path))
+        logger.info(f"archive size: {size}")
+        logger.info("deleting repo")
+        try:
+            # delete repo after archive is created
+            shutil.rmtree(local_repo_dir, onexc=remove_readonly)
+        except FileNotFoundError:
+            pass
     elapsed = default_timer() - start
     base_name = os.path.basename(local_repo_dir)
     logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
@@ -227,12 +230,13 @@ def run(
 def main():
     if sys.version_info < (3, 12):
         sys.exit("sorry, this program requires Python 3.12+")
-    parser = argparse.ArgumentParser()
+    formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=30)
+    parser = argparse.ArgumentParser(formatter_class=formatter)
     parser.add_argument("username", help="github username")
     parser.add_argument(
         "--dir",
         default=os.getcwd(),
-        help="output directory (default: ./)",
+        help="output directory (default: .)",
     )
     parser.add_argument(
         "--format",
