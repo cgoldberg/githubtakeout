@@ -230,7 +230,8 @@ def run(
 def main():
     if sys.version_info < (3, 12):
         sys.exit("sorry, this program requires Python 3.12+")
-    formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=30)
+    def formatter(prog):
+        return argparse.HelpFormatter(prog, max_help_position=30)
     parser = argparse.ArgumentParser(formatter_class=formatter)
     parser.add_argument("username", help="github username")
     parser.add_argument(
