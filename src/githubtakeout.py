@@ -8,6 +8,7 @@ import getpass
 import logging
 import math
 import os
+import re
 import shutil
 import stat
 import sys
@@ -194,6 +195,7 @@ def get_token(prompt_for_token):
 def run(
     username,
     base_dir,
+    pattern,
     archive_format,
     include_gists,
     include_history,
@@ -203,28 +205,30 @@ def run(
     working_dir = os.path.join(base_dir, "backups")
     token = get_token(prompt_for_token)
     repos, gists = get_repos(username, token, include_gists)
-    num_repos = repos.totalCount
+    num_repos = len([repo for repo in repos if re.match(pattern, repo.name)])
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
     logger.info(f"found {num_repos} repos for user '{username}'\n")
     for repo in repos:
-        local_repo_dir = os.path.join(working_dir, repo.name)
-        url = add_creds(repo.clone_url, username, token)
-        if list_only:
-            logger.info(url)
-        else:
-            clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
-    if gists is not None:
-        num_gists = gists.totalCount
-        logger.info("")
-        logger.info(f"found {num_gists} gists for user '{username}'\n")
-        for gist in gists:
-            local_repo_dir = os.path.join(working_dir, gist.id)
-            url = add_creds(gist.git_pull_url, username, token)
+        if re.match(pattern, repo.name):
+            local_repo_dir = os.path.join(working_dir, repo.name)
+            url = add_creds(repo.clone_url, username, token)
             if list_only:
                 logger.info(url)
             else:
-                clone_and_archive_repo(url, local_repo_dir, archive_format, include_history, is_gist=True)
+                clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
+    if gists is not None:
+        num_gists = len([gist for gist in gists if re.match(pattern, gist.id)])
+        logger.info("")
+        logger.info(f"found {num_gists} gists for user '{username}'\n")
+        for gist in gists:
+            if re.match(pattern, gist.id):
+                local_repo_dir = os.path.join(working_dir, gist.id)
+                url = add_creds(gist.git_pull_url, username, token)
+                if list_only:
+                    logger.info(url)
+                else:
+                    clone_and_archive_repo(url, local_repo_dir, archive_format, include_history, is_gist=True)
 
 
 def main():
@@ -240,6 +244,11 @@ def main():
         "--dir",
         default=os.getcwd(),
         help="output directory (default: .)",
+    )
+    parser.add_argument(
+        "--pattern",
+        default=".*",
+        help="regex matching repo names (default: .*)",
     )
     parser.add_argument(
         "--format",
@@ -261,6 +270,7 @@ def main():
         run(
             username=args.username,
             base_dir=args.dir,
+            pattern=args.pattern,
             archive_format=args.format,
             include_gists=args.gists,
             include_history=args.history,
