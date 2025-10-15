@@ -208,25 +208,25 @@ def run(
     num_repos = len([repo for repo in repos if re.match(pattern, repo.name)])
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
-    logger.info(f"found {num_repos} repos for user '{username}'\n")
+    logger.info(f"found {num_repos} repos for user '{username}':\n")
     for repo in repos:
         if re.match(pattern, repo.name):
             local_repo_dir = os.path.join(working_dir, repo.name)
             url = add_creds(repo.clone_url, username, token)
             if list_only:
-                logger.info(url)
+                logger.info(f"{username}/{repo.name}")
             else:
                 clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
     if gists is not None:
         num_gists = len([gist for gist in gists if re.match(pattern, gist.id)])
         logger.info("")
-        logger.info(f"found {num_gists} gists for user '{username}'\n")
+        logger.info(f"found {num_gists} gists for user '{username}':\n")
         for gist in gists:
             if re.match(pattern, gist.id):
                 local_repo_dir = os.path.join(working_dir, gist.id)
                 url = add_creds(gist.git_pull_url, username, token)
                 if list_only:
-                    logger.info(url)
+                    logger.info(f"{username}/{gist.id}\n  - {gist.description}")
                 else:
                     clone_and_archive_repo(url, local_repo_dir, archive_format, include_history, is_gist=True)
 
