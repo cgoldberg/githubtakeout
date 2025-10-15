@@ -89,7 +89,7 @@ def clone(repo_url, local_repo_dir, include_history):
             repo = git.Repo.clone_from(
                 url=repo_url,
                 to_path=local_repo_dir,
-                multi_options=["--depth=1"],
+                multi_options=["--single-branch", "--depth=1"],
                 progress=GitProgress(),
             )
     except git.GitCommandError as e:
