@@ -1,6 +1,6 @@
 # githubtakeout
 
-## Backup and archive Git Repos and Gists from GitHub
+### Backup and archive Git Repos and Gists from GitHub
 
 ---
 
