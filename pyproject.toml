@@ -45,6 +45,9 @@ lint = [
     "refurb",
     "ruff",
 ]
+test = [
+    "pytest",
+]
 validate = [
     "packaging",
     "validate-pyproject",
