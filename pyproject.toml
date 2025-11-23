@@ -56,6 +56,10 @@ validate = [
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+[tool.pytest.ini_options]
+addopts = "-vv" # extra verbose
+tmp_path_retention_policy = "none"
+
 [tool.black]
 line-length = 120
 target-version = [
