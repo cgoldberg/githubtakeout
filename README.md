@@ -66,17 +66,17 @@ the `--token` argument.
 usage: githubtakeout [-h] [--dir DIR] [--pattern PATTERN] [--format {tar,zip,none}] [--gists] [--history] [--list] [--token] username
 
 positional arguments:
-  username                 github username
+  username                    github username
 
 options:
-  -h, --help               show this help message and exit
-  --dir DIR                output directory (default: .)
-  --pattern PATTERN        regex matching repo names (default: .*)
-  --format {tar,zip,none}  archive format (default: zip)
-  --gists                  include gists
-  --history                include commit history and branches (.git directory)
-  --list                   list repos only
-  --token                  prompt for auth token
+  -h, --help                  show this help message and exit
+  --dir DIR                   output directory (default: .)
+  --pattern PATTERN           regex matching repo names (default: .*)
+  --format {tar,zip,none}     archive format (default: zip)
+  --gists                     include gists
+  --history                   include commit history and branches (.git directory)
+  --list                      list repos only
+  --token                     prompt for auth token
 ```
 
 ## Usage Examples:
