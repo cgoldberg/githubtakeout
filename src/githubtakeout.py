@@ -104,7 +104,25 @@ def clone(repo_url, local_repo_dir, include_history):
             pass
 
 
-def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, is_gist=False):
+def pull(local_repo_dir):
+    try:
+        repo = git.Repo(local_repo_dir)
+        origin = repo.remotes.origin
+        origin.fetch()
+        origin.pull(progress=GitProgress())
+    except git.GitCommandError as e:
+        logger.error(e)
+        sys.exit("error: failed pulling changes in repo")
+    finally:
+        try:
+            # release resources
+            repo.close()
+        except UnboundLocalError:
+            # this occurs if we catch a signal while pulling
+            pass
+
+
+def get_and_archive_repo(repo_url, local_repo_dir, archive_format, include_history, keep, is_gist=False):
     def remove_readonly(func, path, _):
         # This is necessary so rmtree() doesn't fail if there are any readonly
         # dirs/files when trying to delete. This seems to happen after cloning on
@@ -118,19 +136,27 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
         # try again
         func(path)
 
-    try:
-        # delete repo if it already exists
-        shutil.rmtree(local_repo_dir, onexc=remove_readonly)
-    except FileNotFoundError:
-        pass
     repo_name = urllib.parse.urlparse(repo_url).path.lstrip("/")
-    logger.info(f"cloning repo: {repo_name} to {local_repo_dir}")
+    # we can only pull if the local repo exists and has a .git directory
+    if Path(local_repo_dir, ".git").exists():
+        needs_clone = False
+    else:
+        needs_clone = True
+        try:
+            shutil.rmtree(local_repo_dir, onexc=remove_readonly)
+        except FileNotFoundError:
+            pass
     start = default_timer()
-    clone(repo_url, local_repo_dir, include_history)
+    if needs_clone:
+        logger.info(f"cloning repo: {repo_name} to: {local_repo_dir}")
+        clone(repo_url, local_repo_dir, include_history)
+    else:
+        logger.info(f"pulling changes from repo: {repo_name} to: {local_repo_dir}")
+        pull(local_repo_dir)
     if not include_history:
         # delete the .git directory if we are not saving history
         try:
-            git_dir = os.path.join(local_repo_dir, ".git")
+            git_dir = Path(local_repo_dir, ".git")
             shutil.rmtree(git_dir, onexc=remove_readonly)
         except FileNotFoundError:
             pass
@@ -138,12 +164,13 @@ def clone_and_archive_repo(repo_url, local_repo_dir, archive_format, include_his
     if archive_path:
         size = convert_size(os.path.getsize(archive_path))
         logger.info(f"archive size: {size}")
-        logger.info("deleting repo")
-        try:
-            # delete repo after archive is created
-            shutil.rmtree(local_repo_dir, onexc=remove_readonly)
-        except FileNotFoundError:
-            pass
+        if not keep:
+            logger.info("deleting repo")
+            try:
+                # delete repo after archive is created
+                shutil.rmtree(local_repo_dir, onexc=remove_readonly)
+            except FileNotFoundError:
+                pass
     elapsed = default_timer() - start
     base_name = os.path.basename(local_repo_dir)
     logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
@@ -199,6 +226,7 @@ def run(
     archive_format,
     include_gists,
     include_history,
+    keep,
     list_only,
     prompt_for_token,
 ):
@@ -216,7 +244,7 @@ def run(
             if list_only:
                 logger.info(f"{username}/{repo.name}")
             else:
-                clone_and_archive_repo(url, local_repo_dir, archive_format, include_history)
+                get_and_archive_repo(url, local_repo_dir, archive_format, include_history, keep)
     if gists is not None:
         num_gists = len([gist for gist in gists if re.match(pattern, gist.id)])
         logger.info("")
@@ -228,7 +256,7 @@ def run(
                 if list_only:
                     logger.info(f"{username}/{gist.id}\n  - {gist.description}")
                 else:
-                    clone_and_archive_repo(url, local_repo_dir, archive_format, include_history, is_gist=True)
+                    get_and_archive_repo(url, local_repo_dir, archive_format, include_history, keep, is_gist=True)
 
 
 def main():
@@ -263,6 +291,7 @@ def main():
         default=False,
         help="include commit history and branches (.git directory)",
     )
+    parser.add_argument("--keep", action="store_true", default=False, help="keep repos after archiving")
     parser.add_argument("--list", action="store_true", default=False, help="list repos only")
     parser.add_argument("--token", action="store_true", default=False, help="prompt for auth token")
     args = parser.parse_args()
@@ -274,6 +303,7 @@ def main():
             archive_format=args.format,
             include_gists=args.gists,
             include_history=args.history,
+            keep=args.keep,
             list_only=args.list,
             prompt_for_token=args.token,
         )

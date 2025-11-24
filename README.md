@@ -31,6 +31,10 @@ Archives are saved in compressed zip format (`.zip`) by default. You can also
 save as tarballs (`.tar.gz`) using the `--format=tar` option, or skip archiving
 using the `--format=none` option.
 
+If a repo with history exists from a previous run, it will pull new changes.
+Otherwise, it will clone the repo. Use the `--keep` if you don't want repos
+deleted after an archive is created.
+
 ## Requirements:
 
 - Python 3.12+
@@ -63,7 +67,9 @@ the `--token` argument.
 ## CLI Options:
 
 ```
-usage: githubtakeout [-h] [--dir DIR] [--pattern PATTERN] [--format {tar,zip,none}] [--gists] [--history] [--list] [--token] username
+usage: githubtakeout [-h] [--dir DIR] [--pattern PATTERN] [--format {tar,zip,none}]
+                     [--gists] [--history] [--keep] [--list] [--token]
+                     username
 
 positional arguments:
   username                    github username
@@ -75,6 +81,7 @@ options:
   --format {tar,zip,none}     archive format (default: zip)
   --gists                     include gists
   --history                   include commit history and branches (.git directory)
+  --keep                      keep repos after archiving
   --list                      list repos only
   --token                     prompt for auth token
 ```
