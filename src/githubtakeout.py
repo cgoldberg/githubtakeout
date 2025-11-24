@@ -20,6 +20,7 @@ from timeit import default_timer
 
 import git
 import github
+from dotenv import load_dotenv
 
 from progress import GitProgress
 
@@ -215,6 +216,8 @@ def get_token(prompt_for_token):
         if not token:
             sys.exit("error: auth token cannot be empty")
     else:
+        # populate environment variable via .env file if it exists
+        load_dotenv()
         token = os.getenv("GITHUB_TOKEN")
     return token
 

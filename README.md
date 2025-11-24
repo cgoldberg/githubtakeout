@@ -61,6 +61,13 @@ can set the `GITHUB_TOKEN` environment variable:
 $ export GITHUB_TOKEN=<access token>
 ```
 
+You can also set this in an `.env` file in the current directory.
+It should contain:
+
+```
+GITHUB_TOKEN=<access token>
+```
+
 If you prefer to be prompted for your token each time you run the program, use
 the `--token` argument.
 
