@@ -61,8 +61,8 @@ can set the `GITHUB_TOKEN` environment variable:
 $ export GITHUB_TOKEN=<access token>
 ```
 
-You can also set this in an `.env` file in the current directory.
-It should contain:
+You can also set this in an `.env` file in the current directory. It should
+contain:
 
 ```
 GITHUB_TOKEN=<access token>
@@ -84,7 +84,8 @@ positional arguments:
 options:
   -h, --help                  show this help message and exit
   --dir DIR                   output directory (default: .)
-  --pattern PATTERN           regex matching repo names (default: .*)
+  --pattern PATTERN           regex matching repo names to include
+  --skip_pattern PATTERN      regex matching repo names to skip
   --format {tar,zip,none}     archive format (default: zip)
   --gists                     include gists
   --history                   include commit history and branches (.git directory)
