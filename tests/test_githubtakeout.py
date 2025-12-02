@@ -57,7 +57,7 @@ def test_run_list_0_match(tmp_path, caplog):
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
-    assert f"found 0 repos" in caplog.text
+    assert "found 0 repos" in caplog.text
     assert "gists" not in caplog.text
     assert not Path(tmp_path / "backups" / repo).exists()
 
@@ -78,8 +78,8 @@ def test_run_list_0_match_with_gists(tmp_path, caplog):
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
-    assert f"found 0 repos" in caplog.text
-    assert f"found 0 gists" in caplog.text
+    assert "found 0 repos" in caplog.text
+    assert "found 0 gists" in caplog.text
     assert not Path(tmp_path / "backups" / repo).exists()
 
 
@@ -98,8 +98,8 @@ def test_run_list_skip_all(tmp_path, caplog):
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
-    assert f"found 0 repos" in caplog.text
-    assert f"found 0 gists" in caplog.text
+    assert "found 0 repos" in caplog.text
+    assert "found 0 gists" in caplog.text
 
 
 @pytest.mark.parametrize("archive_format", ["zip", "tar"])
