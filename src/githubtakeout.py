@@ -206,8 +206,17 @@ def get_repos(username, token, include_gists):
     if include_gists:
         gists = user.get_gists()
     else:
-        gists = None
+        gists = []
     return repos, gists
+
+
+def filter_repos(repos, pattern, skip_pattern, skip_forks):
+    repos = (repo for repo in repos if re.match(pattern, repo.name))
+    if skip_pattern:
+        repos = (repo for repo in repos if not re.match(skip_pattern, repo.name))
+    if skip_forks:
+        repos = (repo for repo in repos if not repo.fork)
+    return repos
 
 
 def get_token(prompt_for_token):
@@ -230,49 +239,43 @@ def run(
     archive_format,
     include_gists,
     include_history,
+    skip_forks,
     keep,
     list_only,
     prompt_for_token,
 ):
     working_dir = os.path.join(base_dir, "backups")
     token = get_token(prompt_for_token)
-    repos, gists = get_repos(username, token, include_gists)
-    num_repos = len(
-        [
-            repo
-            for repo in repos
-            if re.match(pattern, repo.name) and not (re.match(skip_pattern, repo.name) if skip_pattern else False)
-        ]
-    )
+
+    all_repos, gists = get_repos(username, token, include_gists)
+    repos = filter_repos(all_repos, pattern, skip_pattern, skip_forks)
+    num_repos = sum(1 for repo in repos)
+    num_gists = sum(1 for gist in gists)
+
+    # we have to fetch the repos again because we exhaust the generator
+    # when counting repos above
+    all_repos, gists = get_repos(username, token, include_gists)
+    repos = filter_repos(all_repos, pattern, skip_pattern, skip_forks)
     if not list_only:
         logger.info(f"creating archives in: {working_dir}\n")
     logger.info(f"found {num_repos} repos for user '{username}':\n")
     for repo in repos:
-        if re.match(pattern, repo.name) and not (re.match(skip_pattern, repo.name) if skip_pattern else False):
-            local_repo_dir = os.path.join(working_dir, repo.name)
-            url = add_creds(repo.clone_url, username, token)
-            if list_only:
-                logger.info(f"{username}/{repo.name}")
-            else:
-                get_and_archive_repo(url, local_repo_dir, archive_format, include_history, keep)
-    if gists is not None:
-        num_gists = len(
-            [
-                gist
-                for gist in gists
-                if re.match(pattern, gist.id) and not (re.match(skip_pattern, gist.id) if skip_pattern else False)
-            ]
-        )
+        local_repo_dir = os.path.join(working_dir, repo.name)
+        url = add_creds(repo.clone_url, username, token)
+        if list_only:
+            logger.info(f"{username}/{repo.name}")
+        else:
+            get_and_archive_repo(url, local_repo_dir, archive_format, include_history, keep)
+    if include_gists:
         logger.info("")
         logger.info(f"found {num_gists} gists for user '{username}':\n")
         for gist in gists:
-            if re.match(pattern, gist.id) and not (re.match(skip_pattern, gist.id) if skip_pattern else False):
-                local_repo_dir = os.path.join(working_dir, gist.id)
-                url = add_creds(gist.git_pull_url, username, token)
-                if list_only:
-                    logger.info(f"{username}/{gist.id}\n  - {gist.description}")
-                else:
-                    get_and_archive_repo(url, local_repo_dir, archive_format, include_history, keep, is_gist=True)
+            local_repo_dir = os.path.join(working_dir, gist.id)
+            url = add_creds(gist.git_pull_url, username, token)
+            if list_only:
+                logger.info(f"{username}/{gist.id}\n  - {gist.description}")
+            else:
+                get_and_archive_repo(url, local_repo_dir, archive_format, include_history, keep, is_gist=True)
 
 
 def main():
@@ -312,6 +315,12 @@ def main():
         default=False,
         help="include commit history and branches (.git directory)",
     )
+    parser.add_argument(
+        "--skip_forks",
+        action="store_true",
+        default=False,
+        help="skip repos that are forks",
+    )
     parser.add_argument("--keep", action="store_true", default=False, help="keep repos after archiving")
     parser.add_argument("--list", action="store_true", default=False, help="list repos only")
     parser.add_argument("--token", action="store_true", default=False, help="prompt for auth token")
@@ -325,6 +334,7 @@ def main():
             archive_format=args.format,
             include_gists=args.gists,
             include_history=args.history,
+            skip_forks=args.skip_forks,
             keep=args.keep,
             list_only=args.list,
             prompt_for_token=args.token,

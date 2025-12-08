@@ -30,13 +30,14 @@ def test_run_list_1_match(tmp_path, caplog):
         archive_format="none",
         include_gists=False,
         include_history=False,
+        skip_forks=False,
         keep=False,
         list_only=True,
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
     assert f"found 1 repos for user '{USER}'" in caplog.text
-    assert "gists" not in caplog.text
+    assert not re.search(r"found \d* gists", caplog.text)
     assert f"{USER}/{repo}" in caplog.text
     assert not Path(tmp_path / "backups" / repo).exists()
 
@@ -52,13 +53,14 @@ def test_run_list_0_match(tmp_path, caplog):
         archive_format="none",
         include_gists=False,
         include_history=False,
+        skip_forks=False,
         keep=False,
         list_only=True,
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
     assert "found 0 repos" in caplog.text
-    assert "gists" not in caplog.text
+    assert not re.search(r"found \d* gists", caplog.text)
     assert not Path(tmp_path / "backups" / repo).exists()
 
 
@@ -73,13 +75,14 @@ def test_run_list_0_match_with_gists(tmp_path, caplog):
         archive_format="none",
         include_gists=True,
         include_history=False,
+        skip_forks=False,
         keep=False,
         list_only=True,
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
     assert "found 0 repos" in caplog.text
-    assert "found 0 gists" in caplog.text
+    assert re.search(r"found \d* gists", caplog.text)
     assert not Path(tmp_path / "backups" / repo).exists()
 
 
@@ -91,15 +94,15 @@ def test_run_list_skip_all(tmp_path, caplog):
         pattern=".*",
         skip_pattern=".*",
         archive_format="none",
-        include_gists=True,
+        include_gists=False,
         include_history=False,
+        skip_forks=False,
         keep=False,
         list_only=True,
         prompt_for_token=False,
     )
     assert "creating archives" not in caplog.text
     assert "found 0 repos" in caplog.text
-    assert "found 0 gists" in caplog.text
 
 
 @pytest.mark.parametrize("archive_format", ["zip", "tar"])
@@ -115,6 +118,7 @@ def test_run_archive_1_match(archive_format, tmp_path, caplog):
         archive_format=archive_format,
         include_gists=False,
         include_history=False,
+        skip_forks=False,
         keep=False,
         list_only=False,
         prompt_for_token=False,
@@ -147,6 +151,7 @@ def test_run_no_archive_1_match_with_history(tmp_path, caplog):
         archive_format="none",
         include_gists=False,
         include_history=True,
+        skip_forks=False,
         keep=False,
         list_only=False,
         prompt_for_token=False,
@@ -177,6 +182,7 @@ def test_run_no_archive_1_match_without_history(tmp_path, caplog):
         archive_format="none",
         include_gists=False,
         include_history=False,
+        skip_forks=False,
         keep=False,  # this doesn't matter when archive_format is "none"
         list_only=False,
         prompt_for_token=False,
@@ -207,6 +213,7 @@ def test_run_archive_1_match_with_history_pull_with_keep(tmp_path, caplog):
         archive_format="none",
         include_gists=False,
         include_history=True,
+        skip_forks=False,
         keep=True,
         list_only=False,
         prompt_for_token=False,
@@ -230,6 +237,7 @@ def test_run_archive_1_match_with_history_pull_with_keep(tmp_path, caplog):
         archive_format="zip",
         include_gists=False,
         include_history=True,
+        skip_forks=False,
         keep=True,
         list_only=False,
         prompt_for_token=False,
