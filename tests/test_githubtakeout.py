@@ -15,10 +15,15 @@ def require_token():
     load_dotenv()
     required = "GITHUB_TOKEN"
     if not os.getenv(required):
-        pytest.skip(reason=f"{required} environment variable or .env file is required to avoid rate limiting")
+        pytest.skip(
+            reason=f"{required} environment variable or .env file is "
+            "required to avoid rate limiting"
+        )
 
 
-@pytest.mark.skipif(os.getenv("GITHUB_TOKEN"), reason="GITHUB_TOKEN required to avoid rate limiting")
+@pytest.mark.skipif(
+    os.getenv("GITHUB_TOKEN"), reason="GITHUB_TOKEN required to avoid rate limiting"
+)
 def test_run_list_1_match(tmp_path, caplog):
     caplog.set_level("INFO")
     repo = "githubtakeout"
@@ -245,7 +250,9 @@ def test_run_archive_1_match_with_history_pull_with_keep(tmp_path, caplog):
     assert f"found 1 repos for user '{USER}'" in caplog.text
     assert "gists" not in caplog.text
     assert not re.search(f"cloning repo: {USER}/{repo}.git to: .*backups", caplog.text)
-    assert re.search(f"pulling changes from repo: {USER}/{repo}.git to: .*backups", caplog.text)
+    assert re.search(
+        f"pulling changes from repo: {USER}/{repo}.git to: .*backups", caplog.text
+    )
     assert "creating archive:" in caplog.text
     assert "archive size:" in caplog.text
     assert "deleting repo" not in caplog.text

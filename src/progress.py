@@ -20,7 +20,9 @@ class GitProgress(git.RemoteProgress):
         "RESOLVING",
         "WRITING",
     ]
-    OP_CODE_MAP = {getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES}
+    OP_CODE_MAP = {
+        getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES
+    }
 
     def __init__(self):
         super().__init__()

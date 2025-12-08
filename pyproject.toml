@@ -62,13 +62,13 @@ addopts = "-vv" # extra verbose
 tmp_path_retention_policy = "none"
 
 [tool.black]
-line-length = 120
+line-length = 88
 target-version = [
     "py312", "py313", "py314"
 ]
 
 [tool.ruff]
-line-length = 120
+line-length = 88
 respect-gitignore = true
 target-version = "py312"
 
@@ -84,10 +84,10 @@ fixable = ["ALL"]
 
 [tool.ruff.format]
 docstring-code-format = true
-docstring-code-line-length = 120
+docstring-code-line-length = 88
 
 [tool.refurb]
-python_version = "3.9"
+python_version = "3.12"
 enable_all = true
 disable = [
     "FURB104", "FURB107", "FURB147", "FURB173", "FURB183", "FURB184"
