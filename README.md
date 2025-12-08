@@ -74,24 +74,27 @@ the `--token` argument.
 ## CLI Options:
 
 ```
-usage: githubtakeout [-h] [--dir DIR] [--pattern PATTERN] [--format {tar,zip,none}]
-                     [--gists] [--history] [--keep] [--list] [--token]
+$ githubtakeout --help
+usage: githubtakeout [-h] [--dir DIR] [--pattern PATTERN] [--skip_pattern PATTERN]
+                     [--format {tar,zip,none}] [--gists] [--history]
+                     [--skip_forks] [--keep] [--list] [--token]
                      username
 
 positional arguments:
-  username                    github username
+  username                 github username
 
 options:
-  -h, --help                  show this help message and exit
-  --dir DIR                   output directory (default: .)
-  --pattern PATTERN           regex matching repo names to include
-  --skip_pattern PATTERN      regex matching repo names to skip
-  --format {tar,zip,none}     archive format (default: zip)
-  --gists                     include gists
-  --history                   include commit history and branches (.git directory)
-  --keep                      keep repos after archiving
-  --list                      list repos only
-  --token                     prompt for auth token
+  -h, --help               show this help message and exit
+  --dir DIR                output directory (default: .)
+  --pattern PATTERN        regex matching repo names to include
+  --skip_pattern PATTERN   regex matching repo names to skip
+  --format {tar,zip,none}  archive format (default: zip)
+  --gists                  include gists
+  --history                include commit history and branches (.git directory)
+  --skip_forks             skip repos that are forks
+  --keep                   keep repos after archiving
+  --list                   list repos only
+  --token                  prompt for auth token
 ```
 
 ## Usage Examples:
