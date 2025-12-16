@@ -51,27 +51,28 @@ def add_creds(url, username, token):
     return new_url
 
 
-def archive(local_repo_dir, archive_format="zip", is_gist=False):
+def archive(local_repo_dir, archive_format="zip", archive_basename=None):
     if archive_format not in ARCHIVE_FORMATS:
         raise ValueError(f"{archive_format} is not a valid archive format")
     if archive_format == "none":
         return None
-    base_name = os.path.basename(local_repo_dir)
+    basename = os.path.basename(local_repo_dir)
     extension = "tar.gz" if archive_format == "tar" else archive_format
-    archive_name = f"{base_name}.{extension}"
-    if is_gist:
-        archive_name = f"gist-{archive_name}"
+    if archive_basename is None:
+        archive_name = f"{basename}.{extension}"
+    else:
+        archive_name = f"{archive_basename}.{extension}"
     parent_dir = os.path.dirname(local_repo_dir)
     archive_path = os.path.join(parent_dir, archive_name)
     logger.info(f"creating archive: {archive_path}")
     if archive_format == "tar":
         with tarfile.open(archive_path, "w:gz") as tar_archive:
-            tar_archive.add(local_repo_dir, arcname=base_name)
+            tar_archive.add(local_repo_dir, arcname=basename)
     elif archive_format == "zip":
         with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zip_archive:
             repo_path = Path(local_repo_dir)
             for entry in repo_path.rglob("*"):
-                path = os.path.join(base_name, entry.relative_to(repo_path))
+                path = os.path.join(basename, entry.relative_to(repo_path))
                 zip_archive.write(entry, arcname=path)
     return archive_path
 
@@ -124,7 +125,7 @@ def pull(local_repo_dir):
 
 
 def get_and_archive_repo(
-    repo_url, local_repo_dir, archive_format, include_history, keep, is_gist=False
+    repo_url, local_repo_dir, archive_format, include_history, keep, description=None
 ):
     def remove_readonly(func, path, _):
         # This is necessary so rmtree() doesn't fail if there are any readonly
@@ -163,7 +164,15 @@ def get_and_archive_repo(
             shutil.rmtree(git_dir, onexc=remove_readonly)
         except FileNotFoundError:
             pass
-    archive_path = archive(local_repo_dir, archive_format, is_gist)
+    if description:
+        # clean unsafe chars and truncate description to create a useable file name
+        clean_name = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", description)[:255]
+        archive_basename = f"gist - {clean_name}"
+    else:
+        archive_basename = None
+    archive_path = archive(
+        local_repo_dir, archive_format, archive_basename=archive_basename
+    )
     if archive_path:
         size = convert_size(os.path.getsize(archive_path))
         logger.info(f"archive size: {size}")
@@ -285,7 +294,7 @@ def run(
                     archive_format,
                     include_history,
                     keep,
-                    is_gist=True,
+                    description=gist.description,
                 )
 
 
