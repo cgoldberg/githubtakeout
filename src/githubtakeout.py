@@ -309,7 +309,7 @@ def main():
     parser.add_argument("username", help="github username")
     parser.add_argument(
         "--dir",
-        default=os.getcwd(),
+        default=str(Path.cwd()),
         help="output directory (default: .)",
     )
     parser.add_argument(
