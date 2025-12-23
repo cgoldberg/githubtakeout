@@ -290,9 +290,6 @@ def run(
 
 
 def main():
-    if sys.version_info < (3, 12):
-        sys.exit("sorry, this program requires Python 3.12+")
-
     def formatter(prog):
         return argparse.HelpFormatter(prog, max_help_position=30)
 
