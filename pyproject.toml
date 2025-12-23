@@ -75,10 +75,12 @@ target-version = "py312"
 [tool.ruff.lint]
 fixable = ["ALL"]
 select = [
-    "D", "E", "F", "I", "N", "FURB", "PT", "RUF", "TID", "UP", "W"
+    "D", "E", "F", "I", "N", "FURB", "PT",
+    "RUF", "TID", "UP", "W"
 ]
 extend-ignore = [
-    "D100", "D101", "D102", "D103", "D105", "D107", "RUF012"
+    "D100", "D101", "D102", "D103", "D105",
+    "D107", "D203", "D213", "RUF012"
 ]
 
 [tool.ruff.format]
