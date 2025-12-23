@@ -74,7 +74,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = [
-    "D", "E", "F", "I", "PT", "RUF", "TID", "W"
+    "D", "E", "F", "I", "FURB", "PT", "RUF", "TID", "W"
 ]
 extend-ignore = [
     "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203",
@@ -89,6 +89,4 @@ docstring-code-line-length = 88
 [tool.refurb]
 python_version = "3.12"
 enable_all = true
-disable = [
-    "FURB104", "FURB107", "FURB147", "FURB173", "FURB183", "FURB184"
-]
+disable = []

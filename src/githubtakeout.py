@@ -15,6 +15,7 @@ import sys
 import tarfile
 import urllib
 import zipfile
+from contextlib import suppress
 from pathlib import Path
 from timeit import default_timer
 
@@ -56,14 +57,13 @@ def archive(local_repo_dir, archive_format="zip", archive_basename=None):
         raise ValueError(f"{archive_format} is not a valid archive format")
     if archive_format == "none":
         return None
-    basename = os.path.basename(local_repo_dir)
+    basename = local_repo_dir.stem
     extension = "tar.gz" if archive_format == "tar" else archive_format
     if archive_basename is None:
         archive_name = f"{basename}.{extension}"
     else:
         archive_name = f"{archive_basename}.{extension}"
-    parent_dir = os.path.dirname(local_repo_dir)
-    archive_path = os.path.join(parent_dir, archive_name)
+    archive_path = local_repo_dir.parent / archive_name
     logger.info(f"creating archive: {archive_path}")
     if archive_format == "tar":
         with tarfile.open(archive_path, "w:gz") as tar_archive:
@@ -72,7 +72,7 @@ def archive(local_repo_dir, archive_format="zip", archive_basename=None):
         with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zip_archive:
             repo_path = Path(local_repo_dir)
             for entry in repo_path.rglob("*"):
-                path = os.path.join(basename, entry.relative_to(repo_path))
+                path = basename / entry.relative_to(repo_path)
                 zip_archive.write(entry, arcname=path)
     return archive_path
 
@@ -98,12 +98,10 @@ def clone(repo_url, local_repo_dir, include_history):
         logger.error(e)
         sys.exit("error: failed cloning repo")
     finally:
-        try:
+        # `UnboundLocalError` can occur if we catch a signal while cloning
+        with suppress(UnboundLocalError):
             # release resources
             repo.close()
-        except UnboundLocalError:
-            # this occurs if we catch a signal while cloning
-            pass
 
 
 def pull(local_repo_dir):
@@ -116,12 +114,10 @@ def pull(local_repo_dir):
         logger.error(e)
         sys.exit("error: failed pulling changes in repo")
     finally:
-        try:
+        # `UnboundLocalError` can occur if we catch a signal while pulling
+        with suppress(UnboundLocalError):
             # release resources
             repo.close()
-        except UnboundLocalError:
-            # this occurs if we catch a signal while pulling
-            pass
 
 
 def get_and_archive_repo(
@@ -146,10 +142,8 @@ def get_and_archive_repo(
         needs_clone = False
     else:
         needs_clone = True
-        try:
+        with suppress(FileNotFoundError):
             shutil.rmtree(local_repo_dir, onexc=remove_readonly)
-        except FileNotFoundError:
-            pass
     start = default_timer()
     if needs_clone:
         logger.info(f"cloning repo: {repo_name} to: {local_repo_dir}")
@@ -159,11 +153,9 @@ def get_and_archive_repo(
         pull(local_repo_dir)
     if not include_history:
         # delete the .git directory if we are not saving history
-        try:
-            git_dir = Path(local_repo_dir, ".git")
+        git_dir = Path(local_repo_dir, ".git")
+        with suppress(FileNotFoundError):
             shutil.rmtree(git_dir, onexc=remove_readonly)
-        except FileNotFoundError:
-            pass
     if description:
         # clean unsafe chars and truncate description to create a useable file name
         clean_name = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", description)[:255]
@@ -174,18 +166,17 @@ def get_and_archive_repo(
         local_repo_dir, archive_format, archive_basename=archive_basename
     )
     if archive_path:
-        size = convert_size(os.path.getsize(archive_path))
+        size = convert_size(archive_path.stat().st_size)
         logger.info(f"archive size: {size}")
         if not keep:
+            # delete repo after archive is created
             logger.info("deleting repo")
-            try:
-                # delete repo after archive is created
+            with suppress(FileNotFoundError):
                 shutil.rmtree(local_repo_dir, onexc=remove_readonly)
-            except FileNotFoundError:
-                pass
     elapsed = default_timer() - start
-    base_name = os.path.basename(local_repo_dir)
-    logger.info(f"successfully backed up '{base_name}' repo in {elapsed:.3f} secs\n")
+    logger.info(
+        f"successfully backed up '{local_repo_dir.stem}' repo in {elapsed:.3f} secs\n"
+    )
 
 
 def get_repos(username, token, include_gists):
@@ -255,7 +246,7 @@ def run(
     list_only,
     prompt_for_token,
 ):
-    working_dir = os.path.join(base_dir, "backups")
+    working_dir = base_dir / "backups"
     token = get_token(prompt_for_token)
 
     all_repos, gists = get_repos(username, token, include_gists)
@@ -271,7 +262,7 @@ def run(
         logger.info(f"creating archives in: {working_dir}\n")
     logger.info(f"found {num_repos} repos for user '{username}':\n")
     for repo in repos:
-        local_repo_dir = os.path.join(working_dir, repo.name)
+        local_repo_dir = working_dir / repo.name
         url = add_creds(repo.clone_url, username, token)
         if list_only:
             logger.info(f"{username}/{repo.name}")
@@ -283,7 +274,7 @@ def run(
         logger.info("")
         logger.info(f"found {num_gists} gists for user '{username}':\n")
         for gist in gists:
-            local_repo_dir = os.path.join(working_dir, gist.id)
+            local_repo_dir = working_dir / gist.id
             url = add_creds(gist.git_pull_url, username, token)
             if list_only:
                 logger.info(f"{username}/{gist.id}\n  - {gist.description}")
@@ -309,7 +300,7 @@ def main():
     parser.add_argument("username", help="github username")
     parser.add_argument(
         "--dir",
-        default=str(Path.cwd()),
+        default=Path.cwd(),
         help="output directory (default: .)",
     )
     parser.add_argument(
@@ -356,7 +347,7 @@ def main():
     try:
         run(
             username=args.username,
-            base_dir=args.dir,
+            base_dir=Path(args.dir),
             pattern=args.pattern,
             skip_pattern=args.skip_pattern,
             archive_format=args.format,
