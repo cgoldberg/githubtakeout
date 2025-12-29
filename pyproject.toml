@@ -90,4 +90,3 @@ docstring-code-line-length = 88
 [tool.refurb]
 python_version = "3.12"
 enable_all = true
-disable = []
