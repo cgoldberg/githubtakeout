@@ -23,7 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "GitPython==3.1.45",
+    "GitPython==3.1.46",
     "PyGithub==2.8.1",
     "python-dotenv==1.2.1",
     "rich==14.2.0",
