@@ -1,3 +1,8 @@
+# Copyright (c) 2015-2026 Corey Goldberg
+# License: MIT
+
+"""Tests for githubtakeout."""
+
 import os
 import re
 from pathlib import Path

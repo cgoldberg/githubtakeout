@@ -57,7 +57,7 @@ def archive(local_repo_dir, archive_format="zip", archive_basename=None):
         raise ValueError(f"{archive_format} is not a valid archive format")
     if archive_format == "none":
         return None
-    basename = local_repo_dir.stem
+    basename = local_repo_dir.name
     extension = "tar.gz" if archive_format == "tar" else archive_format
     if archive_basename is None:
         archive_name = f"{basename}.{extension}"
@@ -175,7 +175,7 @@ def get_and_archive_repo(
                 shutil.rmtree(local_repo_dir, onexc=remove_readonly)
     elapsed = default_timer() - start
     logger.info(
-        f"successfully backed up '{local_repo_dir.stem}' repo in {elapsed:.3f} secs\n"
+        f"successfully backed up '{local_repo_dir.name}' repo in {elapsed:.3f} secs\n"
     )
 
 
