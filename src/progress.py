@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Corey Goldberg
+# Copyright (c) 2025-2026 Corey Goldberg
 # License: MIT
 # adapted from: https://stackoverflow.com/a/71285627/16148
 

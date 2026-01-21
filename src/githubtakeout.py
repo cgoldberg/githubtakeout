@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2025 Corey Goldberg
+# Copyright (c) 2015-2026 Corey Goldberg
 # License: MIT
 
 """Backup and archive Git Repos and Gists from GitHub."""
