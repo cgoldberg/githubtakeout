@@ -26,7 +26,7 @@ dependencies = [
     "GitPython==3.1.46",
     "PyGithub==2.8.1",
     "python-dotenv==1.2.1",
-    "rich==14.3.1",
+    "rich==14.3.2",
 ]
 
 [project.scripts]
