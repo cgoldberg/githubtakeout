@@ -97,6 +97,10 @@ options:
   --token                  prompt for auth token
 ```
 
+## Screenshot:
+
+![Screenshot](https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/screenshot.png)
+
 ## Usage Examples:
 
 #### Install from PyPI with pipx, Run:
