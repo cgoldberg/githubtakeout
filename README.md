@@ -1,15 +1,43 @@
 # githubtakeout
 
-### Backup and archive Git Repos and Gists from GitHub
+## Backup and archive Git Repos and Gists from GitHub
 
----
+- Copyright (c) 2015-2026 [Corey Goldberg](https://github.com/cgoldberg)
 
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/githubtakeout)](https://pypi.org/project/githubtakeout)
-
-- Copyright (c) 2015-2026 [Corey Goldberg][github-home]
-- Development: [GitHub][github-repo]
-- Download/Install: [PyPI][pypi-githubtakeout]
-- License: [MIT][mit-license]
+<table>
+  <tr>
+    <td>Development</td>
+    <td>
+      <a href="https://github.com/cgoldberg/githubtakeout">
+        GitHub
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>
+      <a href="https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/LICENSE">
+        MIT
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>Releases</td>
+    <td>
+      <a href="https://pypi.org/project/githubtakeout">
+        <img src="https://img.shields.io/pypi/v/githubtakeout.svg">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>Supported Python Versions</td>
+    <td>
+      <a href="https://pypi.org/project/githubtakeout">
+        <img src="https://img.shields.io/pypi/pyversions/githubtakeout">
+      </a>
+    </td>
+  </tr>
+</table>
 
 ----
 
@@ -42,7 +70,7 @@ deleted after an archive is created.
 
 ## Installation:
 
-#### Install from [PyPI][pypi-githubtakeout]:
+#### Install from [PyPI](https://pypi.org/project/githubtakeout):
 
 ```
 pip install githubtakeout
@@ -53,9 +81,10 @@ pip install githubtakeout
 By default, `githubtakeout` will only retrieve an account's public repos. To
 access private repos and secret gists, you need to authenticate.
 
-First, you must create a [personal access token][github-pat] on Github (either
-a fine-grained or classic personal access token). Once you have a token, you
-can set the `GITHUB_TOKEN` environment variable:
+First, you must create a
+[personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+on Github (either a fine-grained or classic personal access token). Once you
+have a token, you can set the `GITHUB_TOKEN` environment variable:
 
 ```
 $ export GITHUB_TOKEN=<access token>
@@ -120,9 +149,3 @@ source venv/bin/activate
 pip install .
 githubtakeout <github username>
 ```
-
-[github-home]: https://github.com/cgoldberg
-[github-repo]: https://github.com/cgoldberg/githubtakeout
-[github-pat]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
-[pypi-githubtakeout]: https://pypi.org/project/githubtakeout
-[mit-license]: https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/LICENSE

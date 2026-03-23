@@ -24,8 +24,8 @@ classifiers = [
 ]
 dependencies = [
     "GitPython==3.1.46",
-    "PyGithub==2.8.1",
-    "python-dotenv==1.2.1",
+    "PyGithub==2.9.0",
+    "python-dotenv==1.2.2",
     "rich==14.3.3",
 ]
 
