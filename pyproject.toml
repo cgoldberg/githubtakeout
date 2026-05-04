@@ -58,7 +58,7 @@ validate = [
 package-dir = {"" = "src"}
 
 [tool.pytest]
-addopts = ["-s", "-vv"]
+addopts = ["-vv"]
 tmp_path_retention_policy = "none"
 
 [tool.black]
