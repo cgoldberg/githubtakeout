@@ -64,15 +64,15 @@ respect-gitignore = true
 target-version = "py312"
 
 [tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN", "COM812", "D", "EM102", "G004", "PLR0913",
+    "RUF012", "S101", "SIM102", "TRY003", "TRY400",
+]
 fixable = ["ALL"]
-select = [
-    "D", "E", "F", "I", "N", "FURB", "PT",
-    "RUF", "TID", "UP", "W"
-]
-extend-ignore = [
-    "D100", "D101", "D102", "D103", "D105",
-    "D107", "D203", "D213", "RUF012"
-]
+
+[tool.ruff.lint.per-file-ignores]
+"**/test_*.py" = ["ARG001", "INP001"]
 
 [tool.ruff.format]
 docstring-code-format = true

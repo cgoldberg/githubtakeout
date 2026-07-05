@@ -131,9 +131,9 @@ def get_and_archive_repo(
         # and and reattempt removal.
         #
         # give read permissions
-        os.chmod(path, stat.S_IREAD)
+        Path.chmod(path, stat.S_IREAD)
         # give write permissions
-        os.chmod(path, stat.S_IWRITE)
+        Path.chmod(path, stat.S_IWRITE)
         # try again
         func(path)
 
@@ -195,7 +195,7 @@ def get_repos(username, token, include_gists):
             if e.data["status"] == "401":
                 sys.exit(f"error: invalid auth token for user '{username}'")
             else:
-                raise e
+                raise
     else:
         gh = github.Github()
         try:
@@ -204,12 +204,9 @@ def get_repos(username, token, include_gists):
             if e.data["status"] == "404":
                 sys.exit(f"error: user '{username}' not found")
             else:
-                raise e
+                raise
         repos = user.get_repos()
-    if include_gists:
-        gists = user.get_gists()
-    else:
-        gists = []
+    gists = user.get_gists() if include_gists else []
     return repos, gists
 
 

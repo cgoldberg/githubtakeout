@@ -143,10 +143,7 @@ def test_run_archive_1_match(archive_format, tmp_path, caplog):
     assert "deleting repo" in caplog.text
     assert f"successfully backed up '{repo}' repo" in caplog.text
     assert not Path(tmp_path / backup_dir / repo).exists()
-    if archive_format == "tar":
-        extension = "tar.gz"
-    else:
-        extension = archive_format
+    extension = "tar.gz" if archive_format == "tar" else archive_format
     assert Path(tmp_path / backup_dir / f"{repo}.{extension}").exists()
 
 
