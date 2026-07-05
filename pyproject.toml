@@ -58,12 +58,6 @@ package-dir = {"" = "src"}
 addopts = ["-vv"]
 tmp_path_retention_policy = "none"
 
-[tool.black]
-line-length = 88
-target-version = [
-    "py312", "py313", "py314"
-]
-
 [tool.ruff]
 line-length = 88
 respect-gitignore = true
@@ -83,7 +77,3 @@ extend-ignore = [
 [tool.ruff.format]
 docstring-code-format = true
 docstring-code-line-length = 88
-
-[tool.refurb]
-python_version = "3.12"
-enable_all = true
