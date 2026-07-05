@@ -48,8 +48,7 @@ test = [
     "pytest",
 ]
 validate = [
-    "packaging",
-    "validate-pyproject",
+    "validate-pyproject[all]",
 ]
 
 [tool.setuptools]
