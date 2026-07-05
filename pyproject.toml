@@ -42,8 +42,6 @@ dev = [
     "tox",
 ]
 lint = [
-    "black",
-    "refurb",
     "ruff",
 ]
 test = [

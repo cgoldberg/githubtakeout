@@ -1,5 +1,6 @@
 # Copyright (c) 2015-2026 Corey Goldberg
-# License: MIT
+# SPDX-License-Identifier: MIT
+
 
 """Progress bar for cloning Git repos."""
 

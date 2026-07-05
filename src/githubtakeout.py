@@ -1,5 +1,6 @@
 # Copyright (c) 2015-2026 Corey Goldberg
-# License: MIT
+# SPDX-License-Identifier: MIT
+
 
 """Backup and archive Git Repos and Gists from GitHub."""
 
