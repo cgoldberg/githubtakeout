@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "githubtakeout"
-version = "0.1.28dev0"
+version = "0.1.28"
 description = "Backup and archive Git Repos and Gists from GitHub"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -23,9 +23,9 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "GitPython==3.1.59",
-    "PyGithub==2.9.1",
-    "python-dotenv==1.2.2",
+    "GitPython==3.1.61",
+    "PyGithub==2.10.0",
+    "python-dotenv==1.2.3",
     "rich==15.0.0",
 ]
 
