@@ -130,22 +130,11 @@ options:
 
 ![Screenshot](https://raw.githubusercontent.com/cgoldberg/githubtakeout/refs/heads/master/screenshot.png)
 
-## Usage Examples:
+## Usage Example:
 
-#### Install from PyPI with pipx, Run:
+#### Install from PyPI with pipx and run:
 
 ```
 pipx install githubtakeout
-githubtakeout <github username>
-```
-
-#### Clone Repo, Create/Activate Virtual Environment, Install from Source, Run:
-
-```
-git clone git@github.com:cgoldberg/githubtakeout.git
-cd ./githubtakeout
-python3 -m venv venv
-source venv/bin/activate
-pip install .
 githubtakeout <github username>
 ```
