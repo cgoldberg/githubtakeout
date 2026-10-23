@@ -288,11 +288,23 @@ def run(
 
 
 def main():
-    def formatter(prog):
-        return argparse.HelpFormatter(prog, max_help_position=30)
 
-    parser = argparse.ArgumentParser(formatter_class=formatter)
-    parser.add_argument("username", help="github username")
+    def formatter(prog):
+        return argparse.HelpFormatter(
+            prog,
+            width=80,
+            max_help_position=30,
+        )
+
+    parser = argparse.ArgumentParser(
+        description="Backup and archive Git Repos and Gists from GitHub.",
+        usage="githubtakeout [OPTIONS] [username]",
+        formatter_class=formatter,
+    )
+    parser.add_argument(
+        "username",
+        help="github username",
+    )
     parser.add_argument(
         "--dir",
         default=Path.cwd(),
@@ -315,7 +327,10 @@ def main():
         help="archive format (default: %(default)s)",
     )
     parser.add_argument(
-        "--gists", action="store_true", default=False, help="include gists"
+        "--gists",
+        action="store_true",
+        default=False,
+        help="include gists",
     )
     parser.add_argument(
         "--history",

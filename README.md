@@ -104,10 +104,9 @@ the `--token` argument.
 
 ```
 $ githubtakeout --help
-usage: githubtakeout [-h] [--dir DIR] [--pattern PATTERN] [--skip_pattern PATTERN]
-                     [--format {tar,zip,none}] [--gists] [--history]
-                     [--skip_forks] [--keep] [--list] [--token]
-                     username
+usage: githubtakeout [OPTIONS] [username]
+
+Backup and archive Git Repos and Gists from GitHub.
 
 positional arguments:
   username                 github username

@@ -35,21 +35,17 @@ githubtakeout = "githubtakeout:main"
 
 [project.urls]
 homepage = "https://github.com/cgoldberg/githubtakeout"
-source = "https://github.com/cgoldberg/githubtakeout"
-download = "https://pypi.org/project/githubtakeout"
+repository = "https://github.com/cgoldberg/githubtakeout"
 
 [dependency-groups]
-dev = [
-    "tox",
-]
 lint = [
-    "ruff",
+    "ruff==0.17.2",
 ]
 test = [
-    "pytest",
+    "pytest==9.1.1",
 ]
 validate = [
-    "validate-pyproject[all]",
+    "validate-pyproject[all]==0.27",
 ]
 
 [tool.setuptools]
@@ -58,6 +54,7 @@ package-dir = {"" = "src"}
 [tool.pytest]
 addopts = ["-v"]
 filterwarnings = ["default"]
+testpaths = ["tests"]
 tmp_path_retention_policy = "none"
 
 [tool.ruff]
