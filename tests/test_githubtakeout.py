@@ -27,9 +27,6 @@ def require_token():
         )
 
 
-@pytest.mark.skipif(
-    os.getenv("GITHUB_TOKEN"), reason="GITHUB_TOKEN required to avoid rate limiting"
-)
 def test_run_list_1_match(tmp_path, caplog):
     caplog.set_level("INFO")
     repo = "githubtakeout"
