@@ -322,7 +322,7 @@ wheels = [
 
 [[package]]
 name = "githubtakeout"
-version = "0.1.32"
+version = "0.1.33.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "gitpython" },
