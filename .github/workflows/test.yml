@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - python-version: "3.12"
-            toxenv: py311
+            toxenv: py312
           - python-version: "3.15"
             toxenv: py315
     steps:
