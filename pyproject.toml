@@ -39,10 +39,10 @@ repository = "https://github.com/cgoldberg/githubtakeout"
 
 [dependency-groups]
 lint = [
-    "ruff==0.17.2",
+    "ruff==0.17.3",
 ]
 test = [
-    "pytest==9.1.1",
+    "pytest==9.2.0",
 ]
 validate = [
     "validate-pyproject[all]==0.27",
