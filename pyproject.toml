@@ -39,7 +39,7 @@ repository = "https://github.com/cgoldberg/githubtakeout"
 
 [dependency-groups]
 lint = [
-    "ruff==0.17.3",
+    "ruff==0.17.5",
 ]
 test = [
     "pytest==9.2.0",
